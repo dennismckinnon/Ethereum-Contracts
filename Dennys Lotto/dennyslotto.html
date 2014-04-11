@@ -1,0 +1,93 @@
+<html>
+<head>
+<title>Hot Russian Grills want to date you!</title>
+		<style>
+body {
+	font-family: Gentium, Georgia, serif
+}
+h1, h2 {
+	font-family: Trebuchet MS, sans
+}
+h1 { 
+	font-size: 16pt
+}
+h2 { 
+	font-size: 13pt
+}
+div {
+	margin-left: 8pt;
+}
+img {
+	margin: 4pt;
+	padding: 6pt;
+}
+		</style>
+<script>
+var lottoAddr = key.addressOf("84aa9ca5ccfd3028c1ed9a3c4dcbe85f2765683d");
+buyticket = function()
+{
+	var ticketnum = Number(document.getElementById("ticket").value);
+	if (ticketnum != "")
+		eth.transact(key.secret(eth.key()), u256.ether(2), lottoAddr, u256.bytesOf(u256.value(ticketnum)), u256.value(10000), eth.gasPrice());
+}
+lookupTickets = function()
+{
+	var myTable= "<table><tr><td style='width: 100px; color: red;'>Your Tickets</td></tr>";
+    myTable+="<tr><td style='width: 100px;                   '>---------------</td></tr>";
+
+	
+	var location = 8;
+	var myaddr = bytes.toString(u256.bytesOf(u256.fromAddress(key.address(eth.key()))));
+
+	while (!u256.isNull(eth.storageAt(lottoAddr, u256.value(location)))) {
+		if (bytes.toString(u256.bytesOf(eth.storageAt(lottoAddr, u256.value(location)))) == myaddr) {
+
+			myTable+="<tr><td style='width: 100px;'>" + u256.toValue(eth.storageAt(lottoAddr, u256.value(location+1))) + "</td></tr>";
+		};
+		location=location+2;
+	};
+
+	myTable+="</table>";
+	document.getElementById('TicketTable').innerHTML = myTable;
+}
+
+claim = function()
+{
+	var myaddr = u256.fromAddress(key.address(eth.key()));
+	eth.transact(key.secret(eth.key()), u256.ether(0), lottoAddr, u256.bytesOf(""), u256.value(10000), eth.gasPrice());
+}
+
+check = function()
+{	
+	var myaddr = u256.fromAddress(key.address(eth.key()));
+	var win = u256.toValue(eth.storageAt(lottoAddr,myaddr));
+    var winning= "<h1><font style=' color: red;'>" + win + " E</font></h1>";
+    document.getElementById('winnings').innerHTML = winning;
+}
+
+lookupJackpot = function()
+{
+	var Jackpot = u256.toValue(eth.storageAt(lottoAddr,u256.value(6)));
+    var JACKP= "<h1><font style=' color: red;'>" + Jackpot + " E</font></h1>";
+    document.getElementById('jackpt').innerHTML = JACKP;
+}
+</script>
+</head>
+<body>
+<h1>Denny's Lotto</h1>
+<h2>(Totally not a scam you can trust me)</h2>
+<b>The Jackpot is:</b><div id="jackpt"> </div>
+<button onClick="lookupJackpot()">Whats the Jackpot?</button><br>
+-------------------------------------------------------------
+<table>
+<tr><td>BUY TICKETS!</td><td> </td></tr>
+<tr><td><label for="name">Ticket Num: </label></td><td><input id="ticket" type="text" value=""/><button onClick="buyticket()">BUY!</button></td></tr>
+</table>
+<button onClick="lookupTickets()">Find My Tickets!</button>
+<div id="TicketTable"> </div><br>
+-------------------------------------------------------------
+<b>Your Winnings:</b><div id="winnings"> </div>
+<button onClick="check()">Check</button><button onClick="claim()">Claim</button>
+<h6>Ticket numbers are in Hexadecimal between 0x00 and 0xFF</h6>
+</body>
+</html>
