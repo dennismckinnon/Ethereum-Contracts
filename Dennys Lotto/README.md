@@ -1,6 +1,6 @@
-Ethereum-Checkers
+Denny's Lotto
 =================
 
-Why am I doing this?
+Totally not a scam!
 
-I must be some special kind of crazy. :P
+I'll write more later. This is an implementation of a lottery with an html interface!
