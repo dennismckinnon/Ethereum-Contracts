@@ -44,7 +44,7 @@
 			[[0x3]] (+ (NUMBER) 1) ;start new round
 			[0x20] (prevhash)
 			[0x40] (coinbase)
-			[0x60] (SHA3 0x1 1) ;Random lottery 
+			[0x60] (SHA3 0x20 0x40) ;Random lottery 
 			[0x80] (MOD @0x3 @@0x2) ;DRAW!
 			[0xA0] 0 ;Counter of number of winners
 			[0xC0] 0x200 ;Storage location

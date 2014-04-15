@@ -1,0 +1,219 @@
+;Infohash Database manager with Membership structure
+
+;API
+;
+;ADMINS
+;suicide (Format: "kill")
+;Register new admin (Format: "regadm" 0xMemberaddress)
+;Register new member (Format: "regmem" 0xMemberaddress)
+;Delete normal member (must be an admin) (Format: "delmem" 0xMemberaddress)
+;Delete Admin member (must be an admin that is higher then the member you re deleting) (Format: "deladm" 0xMemberaddress)
+;Promote normal member to admin (Combo Delete and Add) (Format: "promem" 0xMemberaddress)
+
+;NORMAL MEMBERS
+;Delete magnet link and data (Format: "delmag" 0xinfohash) ??ADMIN priveleges needed?
+;Add/edit Magnet link (Format: "modmag" 0xIndicator (4 hex digits) 0xinfohash "filetype" "quality" "title" "description")
+
+;those are all mostly self explainatory except Add/edit
+;Add/edit will add the magnet link to the database if it doesn't already exist and will copy over the data provided
+;
+
+{
+	[[0x0]] 0x11 ;Admin member pointer
+	[[0x1]] 30 ;Number of segments per item
+	[[0x2]] 0x200 ;Member pointer
+	[[0x3]] 0x0 ;Number of members
+	[[0x4]] 0x0 ;hash number
+	[[0x10]](caller) ;Set admin
+	[0x0] "A"
+;	(call 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 0 0 0 1 0 0)
+}
+{
+	;You can't do anything if you aren't a member so check that first
+	(for [0xAAA] 0x10 (< @0xAAA @@0x0) [0xAAA](+ @0xAAA 1)
+		{
+			(when (= @@ @0xAAA (caller))
+				[0x0] 1 ;Admin
+			)
+		}
+	)
+	(unless @0x0 
+		(for [0xAAA] 0x200 (< @0xAAA @@0x200) [0xAAA](+ @0xAAA 1)
+			{
+				(when (= @@ @0xAAA (caller))
+					[0x0] 2 ;Normal member
+				)
+			}
+		)
+	)
+	(unless @0x0 (stop)) ;Not a member stop
+
+	[0x20] (calldataload 0) ;First argument is txtype
+	(unless @0x20 (stop)) ;No first argument stop
+
+	;Admin suicide (Format: "kill")
+	(when (AND (= @0x20 "kill") (= @0x0 1)) ;Admin and say kill suicide + deregister
+		{
+;			(call 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 0 0 0 0 0 0)
+			(suicide @@0x10)
+		}
+	)
+
+	;Register new admin (Format: "regadm" 0xMemberaddress)
+	(when (AND (= @0x20 "regadm") (= @0x0 1))
+		{
+			[0x40] (calldataload 32) ;Get second data argument
+			(when @0x40
+				{
+					[[@@0x0]] @0x40 ;Store the new member in then next admin slot
+					[[0x0]] (+ @@0x0 1) ;Increment admin pointer 
+				}
+			)
+			(stop)
+		}
+	)
+
+	;Register new member (Format: "regmem" 0xMemberaddress)
+	(when (AND (= @0x20 "regmem")(= @0x0 1)) ;Registration needs admin powers
+		{
+			[0x40] (calldataload 32) ;Get second data argument
+			(when @0x40
+				{
+					[[@@0x2]] @0x40 ;Store the new member in then next admin slot
+					[[0x2]] (+ @@0x2 1) ;Increment admin pointer 
+				}
+			)
+			(stop)
+		}
+	)
+
+	;Delete normal member (must be an admin) (Format: "delmem" 0xMemberaddress)
+	(when (AND (= @0x20 "delmem")(= @0x0 1)) ;Admin priveleges required
+		{
+			[0x40] (calldataload 32) ;Get second data argument
+			(when @0x40
+				{
+					(for [0xAAA] 0x200 (< @0xAAA @@0x2) [0xAAA](+ @0xAAA 1)
+						{
+							(when (= @@ @0xAAA @0x40) ;delete and shuffle
+								{
+									[[0x2]] (- @@0x2 1)
+									[[@0xAAA]] @@ @@0x2
+									[[@@0x2]] 0
+									(stop) ;don't need to do any more
+								}
+							)
+						}
+					)
+				}
+			)
+		}
+	)
+
+	;Delete Admin member (must be an admin that is higher then the member you re deleting) (Format: "deladm" 0xMemberaddress)
+	;Note: This is REALLY costly since order must be maintained
+	(when (AND (= @0x20 "deladm") (= @0x0 1))
+		{
+			[0x40] (calldataload 32) ;Get second data argument
+			(when @0x40
+				{
+					[0x60] 0 ;Flag for if caller appears before attempted deletee
+					[0x80] 0 ;Flag for finding deletee AFTER your number
+					(for [0xAAA]0x10 (< @0xAAA @@0x0) [0xAAA](+ @0xAAA 1)
+						{
+							(when (AND (= @@ @0xAAA @0x40)(= @0x60 1)) [0x80]1) ;Flip ok to delete flag (if the line comes after the next you can delete yourself) 
+							(when (= @@ @0xAAA (caller)) [0x60] 1) ;If caller was found flip flag
+							
+							(when (= @0x80 1) ;delete and shuffle
+								[[@0xAAA]] @@ (+ @0xAAA 1)
+							)
+						}
+					)
+					(when (= @0x80 1) ;If deletion has occured
+						{
+							[[0x0]] (- @@0x0 1) ;Decrement admin pointer
+							[[@@0x0]] 0 ;Delete the last (duplicated guy)
+						}
+					)
+					(stop) ;done
+				}
+			)
+		}
+	)
+
+	;Promote normal member to admin (Combo Delete and Add) (Format: "promem" 0xMemberaddress)
+	(when (AND (= @0x20 "promem")(= @0x0 1)) ;Admin priveleges required
+		{
+			[0x40] (calldataload 32) ;Get second data argument
+			(when @0x40
+				{
+					(for [0xAAA] 0x200 (< @0xAAA @@0x2) [0xAAA](+ @0xAAA 1)
+						{
+							(when (= @@ @0xAAA @0x40) ;delete and shuffle
+								{
+									[[0x2]] (- @@0x2 1)
+									[[@0xAAA]] @@ @@0x2
+									[[@@0x2]] 0
+								}
+							)
+						}
+					)
+					[[@@0x0]] @0x40 ;Store the new member in then next admin slot
+					[[0x0]] (+ @@0x0 1) ;Increment admin pointer
+					(stop) ;Done 
+				}
+			)
+		}
+	)
+
+;DATABASE STUFF
+
+	;Add/Edit Magnet Link (Forward to Database)
+	(when (=@0x20 "modmag")
+		{
+			[0x60] (calldataload 64) ;This is the infohash. It is required!
+			[0x60] (+ @0x60 0x1000000) ;Offset by a bit since the infohash is only 20 bytes (must remember to subtract this if you want to original)
+
+			[0x100] "moddbe"
+			(if (= @@ @0x60 0) ;New
+				{
+					[0x120] @@0x4 ;where to put this data
+					[[@@ @0x60]] @@0x4 ;New number for entry
+					[[0x4]] (+ @@0x4 1) ;Increment the hashcounter
+				}
+				{
+					[0x120] @@ @0x60 ;where this data was put before
+				}
+			)
+			;construct memory
+			[0xE0] 0x140
+			(for [0xA0]32 (< @0xA0 (CALLDATASIZE)) [0xA0](+ @0xA0 32)
+				{
+					[@0xE0](calldatload @0xA0) ;Copy data
+					[0xE0](+ @0xE0 0x20) ;Move
+				}
+			)
+			;Data have been copied into memory Make call
+			(call 0xADDRESSOFDATABASE 0 0 0x100 (+ (CALLDATASIZE) 32) 0 0)
+			(stop)
+		}
+	)
+
+	;Delete database entry (Format: "delmag" 0xINFOHASH)
+	(when (= @0x20 "delmag")
+		{
+			[0x100] "deldbe"
+			[0x120] @@(calldataload 32)
+			[0x140] (calldataload 32)
+			(when (> @@ @0x120 0)
+				{
+					;Make the call to delete
+					(call 0xADDRESSOFDATABASE 0 0 0x100 0x160 0 0)
+					[@@0x120] 0 ;delete entry
+					[[0x4]] (- @@0x4 1) ;Decrement the hash counter 
+				}
+			)
+			(stop)
+		}
+	)
+}
