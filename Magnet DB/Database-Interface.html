@@ -23,7 +23,7 @@ img {
 }
 		</style>
 <script>
-var lottoAddr = key.addressOf("1d44f704ee5ebf08bda0407ef8a438cc026751f2");
+var lottoAddr = key.addressOf("c821dc0e6d3230acce57958af3c90720e2e168e9");
 buyticket = function()
 {
 	var ticketnum = Number(document.getElementById("ticket").value);
@@ -70,7 +70,7 @@ claim = function()
   	{
   		var myaddrs = eth.keys();
 		for (var i = 0; i < myaddrs.length; i++) {
-			eth.transact(key.secret(myaddrs[i]), u256.ether(0), lottoAddr, bytes.fromString("",0), u256.value(10000), eth.gasPrice());
+			eth.transact(key.secret(myaddrs[i]), u256.ether(0), lottoAddr, u256.bytesOf(""), u256.value(10000), eth.gasPrice());
 		};
   	}
 	else
@@ -107,16 +107,16 @@ lookupJackpot = function()
 <h2>(Totally not a scam you can trust me)</h2>
 <b>The Jackpot is:</b><div id="jackpt"> </div>
 <button onClick="lookupJackpot()">Whats the Jackpot?</button><br>
--------------------------------------------------------------
+-------------------------------------------------------------<br>
 <table>
 <tr><td>BUY TICKETS!</td><td> </td></tr>
 <tr><td><label for="name">Ticket Num: </label></td><td><input id="ticket" type="text" value=""/><button onClick="buyticket()">BUY!</button></td></tr>
 </table>
 <button onClick="lookupTickets()">Find My Tickets!</button>
 <div id="TicketTable"> </div><br>
--------------------------------------------------------------
+-------------------------------------------------------------<br>
 <b>Your Winnings:</b><div id="winnings"> </div>
 <button onClick="check()">Check</button><button onClick="claim()">Claim</button>
-<h6>Tickets cost 2 ether each. Ticket numbers are between 0 and 99. The draw happens every 16 blocks. If you get the have the winning ticket you win the JACKPOT*. If you have the same 1's digit you win 5 ether!!</h6>
+<h6>Tickets cost 2 ether each. Ticket numbers are between 0 and 99. The draw happens every 10 blocks. If you get the have the winning ticket you win the JACKPOT*. If you have the same 1's digit you win 5 ether!!</h6>
 </body>
 </html>
