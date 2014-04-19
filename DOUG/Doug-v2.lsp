@@ -24,8 +24,8 @@
 	[[0x0]] 0x88554646AB						;metadata notifier
 	[[0x1]] (CALLER)							;contract creator
 	[[0x2]] "Dennis McKinnon"					;contract Author
-	[[0x3]] 0x18042015							;Date
-	[[0x4]] 0x000001000							;version XXX.XXX.XXX
+	[[0x3]] 0x18042014							;Date
+	[[0x4]] 0x000002000							;version XXX.XXX.XXX
 	[[0x5]] "doug" 								;Name
 	[[0x6]] "12345678901234567890123456789012"	;Brief description (not past address 0xF)
 	[[0x6]] "Doug is a Decentralized Organiza"
