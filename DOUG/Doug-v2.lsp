@@ -39,21 +39,21 @@
 	[[0xE]] "ding DOUG himself."
 
 	;Initialization
-	[[0x10]] (CALLER) 	;temporary
-	[[0x11]] 0x20 		; Name list start
-	[[0x12]] @@0x11 	; name list pointer (next free slot)
-	[[0x13]] 0 			; Allow double register? (i think its best to avoid this)
-	[["doug"]](ADDRESS)	;Register doug with doug
+	[[0x10]] 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 ;NameReg address
+	[[0x11]] 0x20 			; Name list start
+	[[0x12]] (+ @@0x11 1) 	; name list pointer (next free slot)
+	[[0x13]] 0 				; Allow double register? (i think its best to avoid this)
+
+	[[0x20]]"doug"			; Add doug as first in name list (for consistancy) 
+	[["doug"]](ADDRESS)		; Register doug with doug
+	[0x0]"DOUG"
+	(call @@0x10 0 0 0x0 0x20 0 0) ;Register the name DOUG
 }
 {
 
 
 	;Body
 	[0x20] (calldataload 0) ;Get the first argument
-	(when (AND (= @0x20 "kill")(= @@0x10 (CALLER)))
-		(suicide (CALLER))
-	)
-
 
 	(when (= @0x20 "inlist") ;get passed a name checks if its in the list
 		{
@@ -67,8 +67,6 @@
 			(return 0x0 0x20) ;Returns
 		}
 	)
-
-
 
 	(when @@"conc"
 		{
@@ -90,6 +88,13 @@
 								}
 							)
 
+							(when (= @0x40 "doug")
+								{
+									(call @@0x10 0 0 0 0 0 0) ;clear the name registration
+									[0x1A0] "claim"
+									(call @@"doug" 0 0 0x1A0 0x20 0 0) ;Call new doug to tell him to claim name
+								}
+							)
 							(when @@0x13 [[@0x20]] 0) ;Second registration?
 						}
 					)
@@ -98,8 +103,6 @@
 		}
 	)
 
-
-
 	(when (= @0x20 "req") ;Request made
 		{
 			[0x40] (calldataload 0x20) ;Get the requested name
@@ -107,8 +110,6 @@
 			(return 0x60 0x20) ;return the address
 		}
 	)
-
-
 
 	(when (=@0x20 "fetch") ;Fetch from list
 		{
@@ -176,7 +177,15 @@
 											[[0x12]](+ @@0x12 1);increment list pointer
 										}
 									)
+
+									(when (= @0x40 "doug")
+										{
+											(call @@0x10 0 0 0 0 0 0) ;clear the name registration
+										}
+									)
 									(when @@0x13 [[@0x20]] 0) ;Second registration?
+									[0x0] 1 ;Successful registration
+									(return 0x0 0x20)
 								}
 							)
 						}
