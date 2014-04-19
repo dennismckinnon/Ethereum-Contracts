@@ -1,4 +1,6 @@
 ;Whenever Will gets a transaction he returns who Doug is (he first asks who he thought Doug was)
+;Will will also keep a list of known names?
+;Or should doug keep the list of known names?
 {
 	[[0x0]] 0 ;Doug's address
 }
