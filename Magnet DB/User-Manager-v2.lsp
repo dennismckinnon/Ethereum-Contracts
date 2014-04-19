@@ -246,7 +246,7 @@
 
 	;Add/promote admin  (Format: "promem" 0xMemberaddress <position>) (empty postion means put at end of the list)
 	;This can promote any user to an admin position <= to the original caller
-	(when (AND (= @0x20 "promem")(= @0x120 1)) ;Admin priveleges required
+	(when (AND (= @0x20 "regadm")(= @0x120 1)) ;Admin priveleges required
 		{
 			[0x40] "check"
 			[0x60] (calldataload 32) ;Get second data argument

@@ -136,12 +136,10 @@
 		}
 	)
 
-	[[4321]]0xbeef
 
 	(when (=@0x20 "reg") ;Register
 		{
 			[0x40](calldataload 0x20) ;Get the name they are requesting
-			[[0x1234]]0xdead
 			(when (= @@(CALLER) 0) ;This restricts it so a contract can not be requesting two names at once
 				{
 					[[(CALLER)]] @0x40 ;Store the requested name
