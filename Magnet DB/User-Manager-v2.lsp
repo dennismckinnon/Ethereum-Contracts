@@ -59,7 +59,7 @@
 	[[0x8]] "ely and for any contracts reques"
 	[[0x9]] "ting from it."
 
-	[[0x10]] 0x 		;Doug's address
+	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 		;Doug's address
 	[[0x11]] 0x22 		;Admin member pointer
 	[[0x12]] 0x22		;this is the end position for the list of SUPER-admins
 	[[0x13]] 0x20 		;admin list start
@@ -69,7 +69,7 @@
 	[[(CALLER)]] 3 		;Admin+normal
 	[0x0] "reg"
 	[0x20] "user"
-	(call @@0x10 0 0 0x0 0x40 0x0); Register with DOUG
+	(call @@0x10 0 0 0x0 0x40 0x0 0x20); Register with DOUG
 }
 {
 	;Despite the fact that this contract has no dependancies Going to keep DOUG updated regardless

@@ -25,7 +25,7 @@
 	[[0x1]] (CALLER)							;contract creator
 	[[0x2]] "Dennis McKinnon"					;contract Author
 	[[0x3]] 0x18042014							;Date
-	[[0x4]] 0x000002000							;version XXX.XXX.XXX
+	[[0x4]] 0x001002000							;version XXX.XXX.XXX
 	[[0x5]] "doug" 								;Name
 	[[0x6]] "12345678901234567890123456789012"	;Brief description (not past address 0xF)
 	[[0x6]] "Doug is a Decentralized Organiza"
@@ -43,14 +43,15 @@
 	[[0x11]] 0x20 			; Name list start
 	[[0x12]] (+ @@0x11 1) 	; name list pointer (next free slot)
 	[[0x13]] 0 				; Allow double register? (i think its best to avoid this)
+	[[0x14]] 0xFFFF			; The smallest name allowed to be registered  
 
 	[[0x20]]"doug"			; Add doug as first in name list (for consistancy) 
 	[["doug"]](ADDRESS)		; Register doug with doug
-	[0x0]"DOUG"
+	[0x0]"Doug - Reloaded"
 	(call @@0x10 0 0 0x0 0x20 0 0) ;Register the name DOUG
 }
 {
-
+	
 
 	;Body
 	[0x20] (calldataload 0) ;Get the first argument
@@ -130,6 +131,22 @@
 		}
 	)
 
+	(when (=@0x20 "dump") :Dump the list in pairs 
+		{
+			[0x120] 0x200
+			[0x140] 0
+			(for [0x100] @@0x11 (< @0x100 @@0x12) [0x100](+ @0x100 1) ;loop through all names
+				{
+					[@0x120] @@ @0x100 ;Copy name
+					[(+ @0x120 1)] @@ @@ @0x100 ;Copy contract Address
+					[0x120](+ @0x120 2)
+					[0x140](+ @0x140 0x40)
+				}
+			)
+			(return 0x200 @0x140) ;Dump return
+		}
+	)
+
 	(when (= @0x20 "getlistsize")
 		{
 			[0x40](- @@0x12 @@0x11) ;Get the current size of list
@@ -137,10 +154,18 @@
 		}
 	)
 
-
-	(when (=@0x20 "reg") ;Register
+	;Register
+	;This can only happen if This Doug is top of the doug chain. Otherwise this doug simpley serves
+	;To alert new contracts to the new doug.
+	(when (AND (=@0x20 "reg") (= @@"doug" (ADDRESS)))
 		{
 			[0x40](calldataload 0x20) ;Get the name they are requesting
+			(when (< @0x40 @@0x14)
+				{
+					[0x0]0 ;failure to register. Name too low
+					(return 0x0 0x20)
+				} 
+			)
 			(when (= @@(CALLER) 0) ;This restricts it so a contract can not be requesting two names at once
 				{
 					[[(CALLER)]] @0x40 ;Store the requested name
@@ -159,6 +184,8 @@
 							)
 
 							(when @@0x13 [[@0x20]] 0) 	;Second registration?
+							[0x0] 1 ;Successful registration
+							(return 0x0 0x20)
 						}
 						{
 							;Consensus Contract registered. Call it.

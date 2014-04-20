@@ -28,7 +28,11 @@
 	;Initialization of program
 	[[0x10]] 0 				;Doug's Address (insert before making)
 	[[0x11]] 0x40 			;Poll list start
-	[[0x12]] @@0x11 	;Poll list pointer (it starts 4 after the start because start will be used for swaps)
+	[[0x12]] @@0x11 		;Poll list pointer (it starts 4 after the start because start will be used for swaps)
+
+	[0x0] "reg"
+	[0x20] "conc"
+	(call @@0x10 0 0 0x0 0x20 0 0) ;Register for name "conc" with doug
 }
 {
 	;Always start by asking who Doug is
@@ -46,7 +50,8 @@
 		{
 			[0x40] (calldataload 0x20) ;polladdress
 			[0x60] (calldataload 0x40) ;vote
-			[0x80] @@ @0x40 ;list pointer
+			[0x80] (CALLER)
+			[0xA0] @@ @0x40 ;list pointer
 
 			(call @0x40 0 0 0x60 0x20 0x0 0x20) ;register vote returns 0 if still undecided or result if decided
 			[[@0x80]] @0x0 ;store the result at the result slot in the list
@@ -73,6 +78,9 @@
 						[[@@(+ @@0x12 1)]] @0x100 ;Store the pointer to the new block 
 						[[@@(+ @0x100 1)]] 0; Delete old pointer (not necessary but I like to be clean)
 
+						[0x80]"kill"
+						(call (+ @0x100 1) 0 0 0x80 0x0 0x0) ;Remove poll contract
+
 						;Copy over from last slot and delete 
 						[[@0x100]] @@ @@0x12
 						[[@@0x12]]0
@@ -82,6 +90,8 @@
 						[[(+ @@0x12 2)]] 0
 						[[(+ @0x100 3)]] @@ (+ @@0x12 3)
 						[[(+ @@0x12 3)]] 0
+
+
 
 						(return 0x0 0x40) ;return the result
 					)
