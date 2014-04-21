@@ -34,7 +34,7 @@
 ;
 ;ADMINS
 ;##suicide (Format: "kill")## commented out
-;Register new admin 			(Format: "regadm" 0xMemberaddress)
+;Register new admin 			(Format: "regadm" 0xMemberaddress <#position>)
 ;Register new member 			(Format: "regmem" 0xMemberaddress)
 ;Delete member 					(Format: "delmem" 0xMemberaddress)
 ;Modify super-admin level 		(Format: "modsal" #position)
@@ -60,8 +60,8 @@
 	[[0x9]] "ting from it."
 
 	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 		;Doug's address
-	[[0x11]] 0x22 		;Admin member pointer
-	[[0x12]] 0x22		;this is the end position for the list of SUPER-admins
+	[[0x11]] 0x22 		;Admin member pointer (points to the next free slot in the list)
+	[[0x12]] (+ 0x22 1)	;this is the end position for the list of SUPER-admins
 	[[0x13]] 0x20 		;admin list start
 	[[0x20]] (ADDRESS)	;Contract is supreme admin over itself
 	[[(ADDRESS)]]3 		;Admin+normal
