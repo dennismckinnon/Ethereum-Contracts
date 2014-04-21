@@ -59,10 +59,12 @@
 	[0x0] (calldataload 0)	;This is the command
 	[0x20] (calldataload 0x20)	;This is the name
 
-	(when (AND (= @0x0 "kill")(= (CALLER) @@0x1)) (suicide (CALLER))) ;Kill option
+	(when (AND (= @0x0 "kill") (= (CALLER) @@0x1) ) (suicide (CALLER)) ) ;Kill option
 	
 	(when (AND (= @0x0 "reg") (> @0x20 0x20)) ;Command "reg" and make sure it won't overwrite important data 
 		{
+			; Don't let people register their address as their user name. That's just weird...
+			when( (= (CALLER) @0x20 ) (stop) )
 			;Stop if the caller already has a nick.
 			(when @@(caller) (stop))
 			;Stop if the name address is non-empty (nick already taken)
@@ -90,7 +92,7 @@
 		} ;end body of when
 	); end when
 
-	(when (AND (= @0x0 "dereg")(> @0x20 0x20)) ;When they want to deregister and the nick is ins appropiate range
+	(when (AND (= @0x0 "dereg") (> @0x20 0x20) ) ;When they want to deregister and the nick is ins appropiate range
 		{
 			(when @@(caller) 
 				{
@@ -129,6 +131,7 @@
 					(return 0x0 0x20)
 				} ; end when body
 			) ;end when 
+
 			[0x0] 0
 			(return 0x0 0x20)
 		
