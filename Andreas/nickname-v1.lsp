@@ -18,11 +18,8 @@
 
 ;API
 ;
-;Send "name" to register. Send nothing to de-register.
-
-;Structure
-;Admin list
-;address:permission value
+;Send "name" to register.
+;Send nothing to de-register (if contract creator sends nothing, the contract is removed).
 
 {
 	;Metadata  section
@@ -36,8 +33,9 @@
 	[[0x6]] "This Contract allows people to"
 	[[0x7]] "create a nickname for himself,"
 	[[0x8]] "to use in a DAO."
-
+	;For DOUG integration
 	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 ;Doug Address
+	;List data section
 	[[0x11]] 0x0										;Size of list
 	[[0x12]] 0x0										;Tail address
 	[[0x13]] 0x0										;Head address
@@ -47,7 +45,7 @@
 	;(call @@0x10 0 0 0x0 0x40 0x0 0x20) ;Register with DOUG
 
 	;Create a 'dummy' nick to use as permanent list tail. It never goes away, which means we never have
-	;to check if the list is empty when adding or removing elements (which saves us some processing). 
+	;to check if the list is empty when adding or removing elements (saves some processing). 
 	;This permanent tail is the nick made from the address of the contract itself.
 	[0x40] "NickContract"
 	[[@0x40]] (ADDRESS)

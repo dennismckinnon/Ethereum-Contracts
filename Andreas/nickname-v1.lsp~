@@ -18,11 +18,8 @@
 
 ;API
 ;
-;Send "name" to register. Send nothing to de-register.
-
-;Structure
-;Admin list
-;address:permission value
+;Send "name" to register. 
+;Send nothing to de-register (if contract creator sends nothing, the contract is removed).
 
 {
 	;Metadata  section
@@ -60,16 +57,16 @@
 	;If there's at least one argument, we try and register. Store the name string at memory address 0x20
 	[0x20] (calldataload 0)
 	
-	(if (@0x20)
+	(if @0x20
 	{
 		;Stop if the caller already has a nick.
 		(when @@(caller) (stop))
 		;Stop if the name address is non-empty (nick already taken)
 		(when @@ @0x20 (stop))
 		;Stop if the name address + 1 is non-empty
-		(when @@(+ @0x20 1) (stop)
+		(when @@(+ @0x20 1) (stop))
 		;Stop if the name address + 2 is non-empty
-		(when @@(+ @0x20 2) (stop)
+		(when @@(+ @0x20 2) (stop))
 
 		;Store sender at name, and name at sender.
 		[[@0x20]] (caller)
@@ -78,7 +75,7 @@
 		;Update the list. First set the 'next' of the current head to be this one.
 		[[(+ @@0x13 2)]] @@(caller)
 		;Now set the current head as this ones 'previous'.
-		[[@0x20 + 1]] @@0x13
+		[[(+ @0x20 1)]] @@0x13
 		;And set this as the new head.
 		[[0x13]] @0x20
 		;Increase the list size by one.
