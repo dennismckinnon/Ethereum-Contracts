@@ -60,50 +60,52 @@
 	;If there's at least one argument, we try and register. Store the name string at memory address 0x20
 	[0x20] (calldataload 0)
 	
-	(if (@0x20)
+	(if @0x20
 	{
 		;Stop if the caller already has a nick.
 		(when @@(caller) (stop))
 		;Stop if the name address is non-empty (nick already taken)
 		(when @@ @0x20 (stop))
 		;Stop if the name address + 1 is non-empty
-		(when @@(+ @0x20 1) (stop)
+		(when @@(+ @0x20 1) (stop))
 		;Stop if the name address + 2 is non-empty
-		(when @@(+ @0x20 2) (stop)
+		(when @@(+ @0x20 2) (stop))
 
 		;Store sender at name, and name at sender.
 		[[@0x20]] (caller)
 		[[(caller)]] @0x20
 
-		;Update the list. First set the "next" of the current head to be this name address.
-		[[(+ @@0x13 2)]] (caller)
-		;Now set the current list head as previous element in the 'previous' memory slot.     	
-		[[@0x20 + 1]] @@0x13 
-		;And set this as the current head
+		;Update the list. First set the 'next' of the current head to be this one.
+		[[(+ @@0x13 2)]] @@(caller)
+		;Now set the current head as this ones 'previous'.
+		[[(+ @0x20 1)]] @@0x13
+		;And set this as the new head.
 		[[0x13]] @0x20
-		;This element is now the head. Increase the list size by one.
+		;Increase the list size by one.
 		[[0x11]] (+ @@0x11 1)
 		(stop)
 
-	} ;end body of block if there is an argument
+	}
 
 	;No arguments - either de-register or suicide (if it's from owner's address).
 	{
-		; Suicide if it's from owner's address. <-- Not sure what this does exactly.
+		; Suicide if it's from owner's address.
 		(when (= (caller) @@0x1) (suicide (caller)))
 
-		; Otherwise, just de-register any name sender has, if they are registered.
+		; Otherwise, just de-register the nick of the caller, if they are registered.
 		(when @@(caller) {
     	
-			[0x20] (+ @@(caller) 1) ; Here we store the address of 'previous', which always exists.
+			[0x20] (+ @@(caller) 1) ; Here we store the address of this ones 'previous' (which always exists).
 		
 			;Change previous elements 'next' to this ones 'next', if this one has a next (this could be the head..)
 			(if (+ @@(caller) 2) {
-				;Change next elements 'previous' to this ones 'previous'.
+				;Store this ones next temporarily at 0x40
 				[0x40] (+ @@(caller) 2)
+				;Change next elements 'previous' to this ones 'previous'.
 				[[(+ @0x40 1)]] @0x20
+				;Change previosu elements 'next' to this ones 'next'.
 				[[(+ @0x20 2)]] @0x40
-				;Don't change the head, as we removed a middle element.
+				;Don't change the head, as this cannot have been the head.
 			}
 			;If this element is the head - unset 'next' for the previous element making it the head.
 			{
@@ -111,7 +113,7 @@
 				;Set previous as head
 				[[0x13]] @0x20
 			})
-    		
+
 
 			;Now clear out this element and all its associated data.
 
@@ -122,8 +124,8 @@
       	
 			;Decrease the size counter
 			[[0x11]] (- @@0x11 1)
-    	}) ;end when body
-    	(stop)
+		}) ;end when body
+		(stop)
   	} ;end body of no argument block
 	) ;end if block
 	
