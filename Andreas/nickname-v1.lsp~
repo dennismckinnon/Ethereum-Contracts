@@ -146,11 +146,11 @@
 					)
 
 					;Now clear out this element and all its associated data.
-
-					[[@@(caller)]] 0		;The address of the name
-					[[(+ @@(caller) 1)]] 0	;The address for its 'previous'
-					[[(+ @@(caller) 2)]] 0	;The address for its 'next'
-					[[(caller)]] 0			;The actual address
+					[0x80] @@(caller)	;Temp storage for caller name
+					[[@0x80]] 0			;The address of the name
+					[[(+ @0x80 1)]] 0	;The address for its 'previous'
+					[[(+ @0x80 2)]] 0	;The address for its 'next'
+					[[(caller)]] 0		;The actual address
       				
 
 					;We now deregister the caller from the user contract.
