@@ -107,8 +107,17 @@
 	(when (= @0x20 "req") ;Request made
 		{
 			[0x40] (calldataload 0x20) ;Get the requested name
-			[0x60] @@ @0x40 ;Get the registered contracts address
-			(return 0x60 0x20) ;return the address
+			(if (= @@"doug" (ADDRESS))
+				{
+					[0x60] @@ @0x40 ;Get the registered contracts address
+					[0x80](ADDRESS) ;Send back current doug too
+					(return 0x60 0x40) ;return the address
+				}
+				{	;If this doug is not the head of the doug chain pass the request forward to doug
+					(call @@"doug" 0 0 0x20 0x40 0x60 0x40) ;Get the answer from Doug
+					(return 0x60 0x40) ;Return
+				}
+			)
 		}
 	)
 
@@ -131,7 +140,7 @@
 		}
 	)
 
-	(when (=@0x20 "dump") :Dump the list in pairs 
+	(when (=@0x20 "dump") ;Dump the list in pairs 
 		{
 			[0x120] 0x200
 			[0x140] 0
@@ -155,7 +164,7 @@
 	)
 
 	;Register
-	;This can only happen if This Doug is top of the doug chain. Otherwise this doug simpley serves
+	;This can only happen if This Doug is top of the doug chain. Otherwise this doug simply serves
 	;To alert new contracts to the new doug.
 	(when (AND (=@0x20 "reg") (= @@"doug" (ADDRESS)))
 		{
