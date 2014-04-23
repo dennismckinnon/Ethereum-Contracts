@@ -8,6 +8,8 @@
 	[[0x10]]@0x0 ;Copy new doug over
 }
 {
+
+
 	;Check doug again
 	[0x0]"req"
 	[0x20] "doug"
@@ -25,6 +27,8 @@
 	(when (AND (= @0xE0 (CALLER)) (= (calldataload 0) "kill")) ;clean up
 		(suicide (CALLER))
 	)
+
+	(when (> @@0x11 0) (stop)) ;Already been passed
 
 	[0x60] "check"
 	[0x80] (calldataload 0x20)
