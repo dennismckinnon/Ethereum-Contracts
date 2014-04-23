@@ -11,17 +11,24 @@
 ; 0x12 contains a reference to the current tail.
 ; 0x13 contains a reference to the current head.
 ; 
-; Each list element contains three addresses - the first one is the element address,
+; Each list element contains four addresses - the first one is the element address,
 ; which is based on the name. The second one is the address + 1, which contains a
 ; reference to the previous element. The third one is address + 2, which contains
-; a reference to the head.
+; a reference to the head. The fourt one is at address - 1, and contains user level.
+; Element:
+; @@(name - 1) - Contains admin level.
+; @@(name) - Contains user address.
+; @@(name + 1) - Link to previous element (if any).
+; @@(name + 2) - Link to next element (if any).
 
 ;API
 ;
 ;"reg" "name" - register nickname "name" to sender if possible
 ;"dereg" - deregister the nickname held by the caller (if any)
 ;"dereg" "name" - deregister the nickname "name". This is ADMIN ONLY, and can only be done to non-admin nicks.
-;"kill" - kills the contract 
+;"promote" "name" - bump the user up 1 level. Nobody can promote a user beyond his own level.
+;"protome" "name" - This bumps the nick holder up to the caller level, if caller is higher. protome = "promote to me"
+;"kill" - kills the contract. Only callable by the creator.
 {
 	;Metadata  section
 	[[0x0]] 0x88554646AB								;metadata notifier
@@ -42,7 +49,7 @@
 	[[0x13]] 0x0										;Head address
 	
 	;[0x0] "reg"
-	;[0x20] "nick"
+	;[0x20] "userdata"
 	;(call @@0x10 0 0 0x0 0x40 0x0 0x20) ;Register with DOUG
 
 	;Create a 'dummy' nick to use as permanent list tail. It never goes away, which means we never have
@@ -50,24 +57,13 @@
 	;This permanent tail is the nick made from the address of the contract itself.
 	[0x40] "NickContract"
 	[[@0x40]] (ADDRESS)
+	[[(- @0x40 1)]] 9999
 	[[(ADDRESS)]] @0x40
 	[[0x11]] 1				;Set list size to 1.
 	[[0x12]] @0x40 			;Set head and tail to the address corresponding to the hard coded contract nick.
 	[[0x13]] @0x40
 }
 {
-
-	[0x0]"req"
-	[0x20] "doug"
-	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
-	[[0x10]]@0x0 ;Copy new doug over
-
-	; Call doug to get the address to the user level.
-	[0x40] "req"
-	[0x60] "user"
-	; Store the address of "user" in 0x80
-	(call @@0x10 0 0 0x40 0x40 0x80 0x20)
-
 	;If there's at least one argument, we try and register. Store the name string at memory address 0x20
 	[0x0] (calldataload 0)	;This is the command
 	[0x20] (calldataload 0x20)	;This is the name
@@ -86,10 +82,21 @@
 			(when @@(+ @0x20 1) (stop))
 			;Stop if the name address + 2 is non-empty
 			(when @@(+ @0x20 2) (stop))
+			;Stop if the name address - 1 is non-empty.
+			(when @@(- @0x20 1) (stop))
 
 			;Store sender at name, and name at sender.
 			[[@0x20]] (caller)
 			[[(caller)]] @0x20
+			;Store user level
+			(if (= (caller) @@0x1) ; If the caller is the contract creator - bump him up to the nick contracts level (should be max)
+    			{
+					[[(- @0x20 1)]] @@(- @@(ADDRESS) 1)
+				}
+				{
+					[[(- @0x20 1)]] 1
+				}
+			)
 
 			;Update the list. First set the 'next' of the current head to be this one.
 			[[(+ @@0x13 2)]] @0x20
@@ -100,20 +107,6 @@
 			;Increase the list size by one.
 			[[0x11]] (+ @@0x11 1)
 			
-			; Call user contract to check if the caller address is already registered as a user.
-			[0x40] "check"
-			[0x60] (CALLER)
-			; Store the permission level of caller in 0x40
-			(call @0x80 0 0 0x40 0x40 0x40 0x20)
-			
-			; If user is not registered - add him as a normal member, otherwise do nothing.
-			(when (= @0x40 0) 
-				{
-					[0x40] "regmem"
-					[0x60] (CALLER)
-					(call @0x80 0 0 0x40 0x40 0x0 0x20)
-				}
-			)
 			;Return the value 1 for a successful register
 			[0x0] 1
 			(return 0x0 0x20)
@@ -150,13 +143,8 @@
 					[[@0x80]] 0			;The address of the name
 					[[(+ @0x80 1)]] 0	;The address for its 'previous'
 					[[(+ @0x80 2)]] 0	;The address for its 'next'
+					[[(- @0x80 1)]] 0	;The address for its 'next'
 					[[(caller)]] 0		;The actual address
-      				
-
-					;We now deregister the caller from the user contract.
-                    [0x40] "delmem"
-					[0x60] (CALLER)
-					(call @0x80 0 0 0x40 0x40 0x0 0x20)
 					
 					;Decrease the size counter
 					[[0x11]] (- @@0x11 1)
@@ -173,20 +161,10 @@
 
 	(when (AND (= @0x0 "dereg") (> @0x20 0x20) ) ; When de-regging by name.
 		{
-			;First we make sure that the user owning the nick is not an admin,
-			;then we make sure that the deleter (caller) is an admin.
+            [0x40] @@(- @0x20 1) ; Check nick holders level.
+			[0x60] @@(- @@(caller) 1) ; Check callers level
 
-            [0x40] "check"
-			[0x60] @@ @0x20
-			(call @0x80 0 0 0x40 0x40 0x100 0x20)
-
-			(unless (< @0x100 3) (stop) )
-
-			[0x40] "check"
-			[0x60] (caller)
-			(call @0x80 0 0 0x40 0x40 0x100 0x20)
-
-			(unless (> @0x100 1) (stop) )
+			(unless (> @0x60 @0x40) (stop) )
 			
 
 			[0x40] @@(+ @0x20 1) ; Here we store the this ones 'previous' (which always exists).
@@ -215,15 +193,76 @@
 			[[@0x20]] 0			;The address of the name
 			[[(+ @0x20 1)]] 0	;The address for its 'previous'
 			[[(+ @0x20 2)]] 0	;The address for its 'next'
-      			
-
-			;We now deregister the nick owner from the user contract.
-            [0x40] "delmem"
-			[0x60] @0x20
-			(call @0x80 0 0 0x40 0x40 0x0 0x20)
+			[[(- @0x20 1)]] 0	;The admin level
 					
 			;Decrease the size counter
 			[[0x11]] (- @@0x11 1)
+			[0x0] 1
+			(return 0x0 0x20)
+
+		} ; end when body
+	) ;end when
+
+	(when (AND (= @0x0 "promote") (> @0x20 0x20) ) ;When promoting
+		{
+            [0x40] (- @0x20 1) 		; Pointer to nick holder level address.
+			[0x60] (- @@(caller) 1) ; Pointer to caller level address
+			[0x80] @@ @0x40			; Nick holders level
+			[0x100] @@ @0x60		; Caller level
+			
+			(unless (> @0x100 @0x80) (stop) ) ;Check callerlevel > nickholderlevel
+
+			[[@0x40]] (+ @0x80 1) ; Increase nick holders level by 1.
+			[0x0] 1
+			(return 0x0 0x20)
+
+		} ; end when body
+	) ;end when
+
+	(when (AND (= @0x0 "protome") (> @0x20 0x20) ) ;When promoting to take someone to your own level
+		{
+            [0x40] (- @0x20 1) 		; Pointer to nick holder level address.
+			[0x60] (- @@(caller) 1) ; Pointer to caller level address
+			[0x80] @@ @0x40			; Nick holders level
+			[0x100] @@ @0x60		; Caller level
+			
+			(unless (> @0x100 @0x80) (stop) ) ;Check callerlevel > nickholderlevel
+
+			[[@0x40]] @0x100 ; Increase nick holders level by 1.
+			[0x0] 1
+			(return 0x0 0x20)
+
+		} ; end when body
+	) ;end when
+
+	(when (AND (= @0x0 "demote") (> @0x20 0x20) ) ;When demoting
+		{
+            [0x40] (- @0x20 1) 		; Pointer to nick holder level address.
+			[0x60] (- @@(caller) 1) ; Pointer to caller level address
+			[0x80] @@ @0x40			; Nick holders level
+			[0x100] @@ @0x60		; Caller level
+			
+			
+			(unless (> @0x100 @0x80) (stop) ) ;Check callerlevel > nickholderlevel
+
+			[[@0x40]] (- @0x80 1) ; Decrease nick holders level by 1.
+			[0x0] 1
+			(return 0x0 0x20)
+
+		} ; end when body
+	) ;end when
+
+	(when (AND (= @0x0 "fulldemote") (> @0x20 0x20) ) ;When demoting
+		{
+            [0x40] (- @0x20 1) 		; Pointer to nick holder level address.
+			[0x60] (- @@(caller) 1) ; Pointer to caller level address
+			[0x80] @@ @0x40			; Nick holders level
+			[0x100] @@ @0x60		; Caller level
+			
+			
+			(unless (> @0x100 @0x80) (stop) ) ;Check callerlevel > nickholderlevel
+
+			[[@0x40]] 1 ; Set nick holder level to 1
 			[0x0] 1
 			(return 0x0 0x20)
 
