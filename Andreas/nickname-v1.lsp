@@ -120,7 +120,7 @@
 		} ;end body of when
 	); end when
 
-	(when (AND (= @0x0 "dereg") (= 0x20 0) )  ;When de-regging a users own nick (no nick param).
+	(when (AND (= @0x0 "dereg") (= @0x20 0) )  ;When de-regging a users own nick (no nick param).
 		{
 
 			(when @@(caller)
