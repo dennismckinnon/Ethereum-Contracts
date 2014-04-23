@@ -89,7 +89,7 @@
 	(when @@"pollcodes"
 		{
 			[0x60]0x18 ;previous pointer address
-			[0x0]@@(0x18) ;current position
+			[0x0] @@0x18 ;current position
 			(while (> @0x0 0) ;Loop until head is reached or the next pointer = 0
 				{
 					;Loop until the current position is 0 (previous pointer pointed to 0)
