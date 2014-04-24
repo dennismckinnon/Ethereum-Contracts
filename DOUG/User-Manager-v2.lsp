@@ -65,7 +65,8 @@
 	[[0x13]] 0x20 		;admin list start
 	[[0x20]] (ADDRESS)	;Contract is supreme admin over itself
 	[[(ADDRESS)]]3 		;Admin+normal
-	[[0x21]] (CALLER) 	;Set Caller as first admin
+	[[0x21]] 0 			;reserved for Nick
+	[[0x22]] (CALLER) 	;Set Caller as first admin
 	[[(CALLER)]] 3 		;Admin+normal
 	[0x0] "reg"
 	[0x20] "user"
@@ -78,6 +79,14 @@
 	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
 	[[0x10]]@0x0 ;Copy new doug over
 
+	[0x0] "req"
+	[0x20] "nick"
+	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
+	(unless (OR (= @0x0 @@0x21)(= @@0x21 0))
+		[[@@0x21]]0
+	)
+	[[0x21]]@0x0 ;Copy nick into admin over
+	[[@@0x21]] 3 ;Nick gets admin rights
 
 	;AND NOW BACK TO YOUR REGULARLY SCHEDULED PROGRAMMING (hehe pun)
 	[0x20] (calldataload 0) ;First argument is txtype
