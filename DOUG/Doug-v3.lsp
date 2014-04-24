@@ -41,7 +41,6 @@
 	[[0x10]] 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 ;NameReg address
 	[[0x11]] 0x20 			; Name list start
 	[[0x12]] (+ @@0x11 1) 	; name list pointer (next free slot)
-	[[0x13]] 0 				; Allow double register? (i think its best to avoid this)
 	[[0x14]] 0xFFFF			; The smallest name allowed to be registered  
 
 	[[0x20]]"doug"			; Add doug as first in name list (for consistancy) 
@@ -88,8 +87,8 @@
 
 	(when @@"pollcodes"
 		{
-			[0x60]0x18 ;previous pointer address
-			[0x0] @@0x18 ;current position
+			[0x60](+ @@0x15 1) ;previous pointer address
+			[0x0] @@ @0x60 ;current position
 			(while (> @0x0 0) ;Loop until head is reached or the next pointer = 0
 				{
 					;Loop until the current position is 0 (previous pointer pointed to 0)
@@ -97,14 +96,20 @@
 					[0x20]"check"
 					(call @0x0 0 0 0x20 0x20 0x40 0x20)
 
+
+					[0x80] @@(+ @0x0 1) ;get next address from curren next pointer
+
 					(when (= @0x40 1)
 						{
 							;Delete link
-							[0x80] @@(+ @0x0 1) ;get next address from curren next pointer
 							[[@0x0]]0
 							[[(+ @0x0 1)]]0  ;Delete link, Copy next address to previous pointer and move to next slot (= 0 at end)
-							[0x0] @0x80 ;change current to next
-							[[@0x60]] @0x80 ;change the previous pointer address to point to the next address
+							[[@0x60]]@0x80
+
+							(when (= @0x80 0)
+								[[0x16]](- @0x60 1) ;Set previous as new head
+							)
+							
 						}
 					)
 
@@ -114,6 +119,9 @@
 							[0x20] "inlist"
 							[0x40] @@ @@ @0x0 ;copy the name (name is stored at the address of the contract in question at 0x0)
 							(call @@"doug" 0 0 0x20 0x40 0xC0 0x20)
+
+							[[@0x40]] (CALLER);			;Register contract address
+
 							(when (= @0xC0 0) ;name not in list add it
 								{
 									[[@@0x12]]@0x40
@@ -129,13 +137,20 @@
 								}
 							)
 
-							[0x80] @@(+ @0x0 1) ;get next address from curren next pointer
 							[[@0x0]]0
 							[[(+ @0x0 1)]]0  ;Delete link, Copy next address to previous pointer and move to next slot (= 0 at end)
-							[0x0] @0x80 ;change current to next
-							[[@0x60]] @0x80 ;change the previous pointer address to point to the next address
+							[[@0x60]]@0x80
+
+							(when (= @0x80 0)
+								[[0x16]](- @0x60 1) ;Set previous as new head
+							)
 						}
 					)
+					(when (= @0x40 0) ;If the link is not removed then move previous pointer address (otherwise leave it there)
+						[0x60] (+ @0x0 1) ;change the previous pointer address to current pointer address
+					)
+					
+					[0x0] @0x80 ;change current to next
 				}
 			)
 		}
@@ -186,8 +201,8 @@
 			(for [0x100] @@0x11 (< @0x100 @@0x12) [0x100](+ @0x100 1) ;loop through all names
 				{
 					[@0x120] @@ @0x100 ;Copy name
-					[(+ @0x120 1)] @@ @@ @0x100 ;Copy contract Address
-					[0x120](+ @0x120 2)
+					[(+ @0x120 0x20)] @@ @@ @0x100 ;Copy contract Address
+					[0x120](+ @0x120 0x40)
 					[0x140](+ @0x140 0x40)
 				}
 			)
@@ -232,7 +247,6 @@
 								}
 							)
 
-							(when @@0x13 [[@0x20]] 0) 	;Second registration?
 							[0x0] 1 ;Successful registration
 							(return 0x0 0x20)
 						}
@@ -241,49 +255,18 @@
 							[0x20]"inlist"
 							(call @@"doug" 0 0 0x20 0x40 0 0x20
 
+							[0x100]"create"
 							(if (= @0x0 0) ;If there is no contract registered to that name
-								[0x60]"poll1" ;ask for polltype 1 ;Default. Always should have a default for contracts with names you don't recognize
-								[0x60]"poll2" ;ask for polltype 2 
+								[0x120]"poll1" ;ask for polltype 1 ;Default. Always should have a default for contracts with names you don't recognize
+								[0x120]"poll2" ;ask for polltype 2 
 							)
 							[0x80]0 ;Safety measure in case something goes wrong
-							(call @@"pollcodes" 0 0 0x60 0x20 0x80 0x20) ; Call the pollcodes contract returns address of requested poll to [0x80]
+							(call @@"pollcodes" 0 0 0x100 0x40 0x80 0x20) ; Call the pollcodes contract returns address of requested poll to [0x80]
 
-							;Initialize the poll codes contract
-							[0x60](CALLER)
-							[0xA0]1 ;Safety measure incase the poll code does not properly respond (Auto-reject)
-							(call @0x80 0 0 0x40 0x40 0xA0 0x40) ;Initializes and returns 
-						
-							;pollcode contract already returns [Accepted(2)/rejected(1)/undecided(0)]
-							(when (= @0xA0 2)
-								{
-									;Already accepted
-									[[@0x40]](CALLER) ;Set contract at name
-
-									(when (= @0x0 0) ;name not in list add it
-										{
-											[[@@0x12]]@0x40
-											[[0x12]](+ @@0x12 1);increment list pointer
-										}
-									)
-
-									(when (= @0x40 "doug")
-										{
-											(call @@0x10 0 0 0 0 0 0) ;clear the name registration
-										}
-									)
-
-									[0x0] 1 ;Successful registration
-									(return 0x0 0x20)
-								}
-							)
-							(when (= @0xA0 0) ;Not yet decided
-								{
-									;Construct linked list entry
-									[[@0x80]]@0x40 ;Stick name in first slot
-									[[(+ @@0x16 1)]] @0x80 ;Set previous head to point here
-									[[0x16]]@0x80 ;Set the new head to point here
-								}
-							)
+							;Construct linked list entry
+							[[@0x80]](CALLER) ;Stick contract in first slot
+							[[(+ @@0x16 1)]] @0x80 ;Set previous head to point here
+							[[0x16]]@0x80 ;Set the new head to point here
 						}
 					)
 				}

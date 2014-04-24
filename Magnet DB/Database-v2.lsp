@@ -60,7 +60,7 @@
 	[[0x9]] "ovided upon entry creation"
 
 
-	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9		;Hardcode in a first DOUG
+	[[0x10]] 0x9439e5c6b306000e468776a4aa9536f9e69a8ca6		;Hardcode in a first DOUG
 	[[0x11]] 0x20 											;Start of infohash list
 	[[0x12]] @@0x11											;infohash list pointer
 	[[0x13]] 32						 						;Number of segments per item
@@ -125,6 +125,7 @@
 				{
 					;If its old then fetch the locator
 					[0x60] (+ @@ @0xA0 2) ;+2 skip infohash and caller fields
+					(unless (= (CALLER) @@(- 0x60 1)) (stop)) ;Only the creator can edit
 				}
 			)
 
@@ -233,6 +234,8 @@
 
 			[0x60] @@ @0xA0 ;Fetch Locator
 			[0x80] (- @@0x12 @@0x13) ;Locator for item to move over
+
+			(unless(OR (= @0x0 1)(= (CALLER) @@(+ @0x60 1)))(stop)) ; must be admin or creator
 
 			[[@0xA0]] 0; Clear out
 
