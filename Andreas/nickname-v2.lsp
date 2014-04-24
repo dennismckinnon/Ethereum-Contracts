@@ -1,12 +1,14 @@
-;Nickname generator
-
-;This contract is used to register a nickname with a ethereum address. The nick is registered
-;at 0xADDRESS, and the address is registered at the address corresponding to the name string.
-;There is a linked list system connecting user names, to make it possible to list all currently
-;registered names.
-
-
+; Nickname generator
+;
+; This contract is used to register a nickname with a ethereum address. The nick is registered
+; at 0xADDRESS, and the address is registered at the address corresponding to the name string.
+; There is a linked list system connecting user names, to make it possible to list all currently
+; registered names. The user level is stored at 0xADDRESS - 1, and can be used to enable/disable
+; user privileges.
+;
 ; LINKED LIST MECHANICS
+;
+; INITIALIZATION
 ; 0x11 contains the size of the list.
 ; 0x12 contains a reference to the current tail.
 ; 0x13 contains a reference to the current head.
@@ -15,22 +17,32 @@
 ; which is based on the name. The second one is the address + 1, which contains a
 ; reference to the previous element. The third one is address + 2, which contains
 ; a reference to the head. The fourt one is at address - 1, and contains user level.
-; Element:
+;
+; Elements:
 ; @@(name - 1) - Contains admin level.
 ; @@(name) - Contains user address.
 ; @@(name + 1) - Link to previous element (if any).
 ; @@(name + 2) - Link to next element (if any).
-
+; 
+; Names and addresses are cross-linked; the user name is stored at @@userAddress.
+;
+; DEPENDENCIES
+;
+; none
+;
 ; API
 ;
-; "reg" "name" - register nickname "name" to sender if possible
+; "reg" "name" - register the callers nickname "name" with the contract, if possible (if name is available etc.).
 ; "dereg" - deregister the nickname held by the caller (if any)
 ; "dereg" "name" - deregister the nickname "name". This is ADMIN ONLY, and can only be done to non-admin nicks.
 ; "promote" "name" - bump the user up 1 level. Nobody can promote a user beyond his own level.
 ; "protome" "name" - This bumps the nick holder up to the caller level, if caller is higher. protome = "promote to me"
 ; "demote" "name" - Brings a user down a level. Only possible if caller is higher level then nick owner.
 ; "fulldemote" "name" - Brings a user down to level 1 - the lowest possible level. Only possible if caller level > nick holder level.
+; "getlevel" "name" - Get the admin level of nick holder.
 ; "kill" - kills the contract. Only callable by the creator.
+
+; INIT
 {
 	;Metadata  section
 	[[0x0]] 0x88554646AB								;metadata notifier
@@ -41,8 +53,8 @@
 	[[0x5]] "Nickname Contract"							;Name
 	[[0x6]] "12345678901234567890123456789012"			;Brief description (not past address 0xF)
 	[[0x6]] "This Contract allows people to"
-	[[0x7]] "create a nickname for himself,"
-	[[0x8]] "to use in a DAO."
+	[[0x7]] "register with a DAO based on a"
+	[[0x8]] "DOUG cluster."
 	;For DOUG integration
 	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 ;Doug Address
 	;List data section
@@ -65,6 +77,8 @@
 	[[0x12]] @0x40 			;Set head and tail to the address corresponding to the hard coded contract nick.
 	[[0x13]] @0x40
 }
+
+;BODY
 {
 	;If there's at least one argument, we try and register. Store the name string at memory address 0x20
 	[0x0] (calldataload 0)	;This is the command
@@ -267,6 +281,13 @@
 			[[@0x40]] 1 ; Set nick holder level to 1
 			[0x0] 1
 			(return 0x0 0x20)
+
+		} ; end when body
+	) ;end when
+
+	(when (AND (= @0x0 "getlevel") (> @0x20 0x20) ) ;Get user level
+		{
+			(return @@(- @0x20 1) 0x20)
 
 		} ; end when body
 	) ;end when
