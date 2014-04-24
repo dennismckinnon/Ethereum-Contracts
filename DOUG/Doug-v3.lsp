@@ -160,49 +160,47 @@
 	)
 
 
-;OUTDATED NEEDS TO BE UPDATED FOR NEW LINKED LIST STRUCTURE
-;	(when (=@0x20 "fetch") ;Fetch from list
-;		{
-;			[0x40](calldataload 0x20) ;Get the requested number
-;			[0x0] (+ @@0x11 @0x40)
-;			(if (AND (>= @0x0 @@0x11)(< @0x0 @@0x12))
-;				{
-;					;Get the [name:contractID] pair
-;					[0x60]@@ @0x0 ;Get name
-;					[0x80]@@ @0x60 ;Get registered contract ID
-;					(return 0x60 0x40) ;send back
-;				}
-;				{
-;					;If not in range return [0:0]
-;					(return 0x60 0x40)
-;				}
-;			)
-;		}
-;	)
-;
-;	(when (=@0x20 "dump") ;Dump the list in pairs 
-;		{
-;			[0x120] 0x200
-;			[0x140] 0
-;			(for [0x100] @@0x11 (< @0x100 @@0x12) [0x100](+ @0x100 1) ;loop through all names
-;				{
-;					[@0x120] @@ @0x100 ;Copy name
-;					[(+ @0x120 1)] @@ @@ @0x100 ;Copy contract Address
-;					[0x120](+ @0x120 2)
-;					[0x140](+ @0x140 0x40)
-;				}
-;			)
-;			(return 0x200 @0x140) ;Dump return
-;		}
-;	)
-;
-;	(when (= @0x20 "getlistsize")
-;		{
-;			[0x40](- @@0x12 @@0x11) ;Get the current size of list
-;			(return 0x40 0x20)
-;		}
-;	)
-;OUTDATED NEEDS TO BE UPDATED FOR NEW LINKED LIST STRUCTURE
+	(when (=@0x20 "fetch") ;Fetch from list
+		{
+			[0x40](calldataload 0x20) ;Get the requested number
+			[0x0] (+ @@0x11 @0x40)
+			(if (AND (>= @0x0 @@0x11)(< @0x0 @@0x12))
+				{
+					;Get the [name:contractID] pair
+					[0x60]@@ @0x0 ;Get name
+					[0x80]@@ @0x60 ;Get registered contract ID
+					(return 0x60 0x40) ;send back
+				}
+				{
+					;If not in range return [0:0]
+					(return 0x60 0x40)
+				}
+			)
+		}
+	)
+
+	(when (=@0x20 "dump") ;Dump the list in pairs 
+		{
+			[0x120] 0x200
+			[0x140] 0
+			(for [0x100] @@0x11 (< @0x100 @@0x12) [0x100](+ @0x100 1) ;loop through all names
+				{
+					[@0x120] @@ @0x100 ;Copy name
+					[(+ @0x120 1)] @@ @@ @0x100 ;Copy contract Address
+					[0x120](+ @0x120 2)
+					[0x140](+ @0x140 0x40)
+				}
+			)
+			(return 0x200 @0x140) ;Dump return
+		}
+	)
+
+	(when (= @0x20 "getlistsize")
+		{
+			[0x40](- @@0x12 @@0x11) ;Get the current size of list
+			(return 0x40 0x20)
+		}
+	)
 
 
 	;Register

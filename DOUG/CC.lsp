@@ -2,7 +2,7 @@
 ;
 ;Basic Always accepts
 {
-	[[0x0]] 0x2341ce496f485309329ead1a4e5a0f038515705e ;Doug's Address
+	[[0x0]] 0x93df1c337e9e0968e94885b306485283992d64a9 ;Doug's Address
 	[0x0]"reg"
 	[0x20]"conc"
 	(call @@0x0 0 0 0x0 0x40 0 0) ;Register with doug
