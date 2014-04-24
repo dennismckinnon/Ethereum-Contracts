@@ -32,7 +32,7 @@
 ;
 ; API
 ;
-; "reg" "name" - register nickname "name" to sender if possible
+; "reg" "name" - register the callers nickname "name" with the contract, if possible (if name is available etc.).
 ; "dereg" - deregister the nickname held by the caller (if any)
 ; "dereg" "name" - deregister the nickname "name". This is ADMIN ONLY, and can only be done to non-admin nicks.
 ; "promote" "name" - bump the user up 1 level. Nobody can promote a user beyond his own level.
@@ -53,8 +53,8 @@
 	[[0x5]] "Nickname Contract"							;Name
 	[[0x6]] "12345678901234567890123456789012"			;Brief description (not past address 0xF)
 	[[0x6]] "This Contract allows people to"
-	[[0x7]] "create a nickname for himself,"
-	[[0x8]] "to use in a DAO."
+	[[0x7]] "register with a DAO based on a"
+	[[0x8]] "DOUG cluster."
 	;For DOUG integration
 	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 ;Doug Address
 	;List data section

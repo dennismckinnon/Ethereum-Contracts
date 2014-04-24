@@ -39,7 +39,7 @@
 ; "protome" "name" - This bumps the nick holder up to the caller level, if caller is higher. protome = "promote to me"
 ; "demote" "name" - Brings a user down a level. Only possible if caller is higher level then nick owner.
 ; "fulldemote" "name" - Brings a user down to level 1 - the lowest possible level. Only possible if caller level > nick holder level.
-; "getlevel" "name" - Get the admin level of nick holder.
+; "getpriv" "name" - Get the the user privileges (currently "level") of the nick holder.
 ; "kill" - kills the contract. Only callable by the creator.
 
 ; INIT
@@ -285,7 +285,7 @@
 		} ; end when body
 	) ;end when
 
-	(when (AND (= @0x0 "getlevel") (> @0x20 0x20) ) ;Get user level
+	(when (AND (= @0x0 "getpriv") (> @0x20 0x20) ) ;Get user priveleges
 		{
 			(return @@(- @0x20 1) 0x20)
 
