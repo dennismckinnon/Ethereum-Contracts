@@ -59,8 +59,8 @@
 	[[0x8]] "ely and for any contracts reques"
 	[[0x9]] "ting from it."
 
-	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 		;Doug's address
-	[[0x11]] 0x22 		;Admin member pointer
+	[[0x10]] 0xfc87f9b92b37b9b6133a22ff3352f72996de77eb 	;Doug's address
+	[[0x11]] 0x23 		;Admin member pointer
 	[[0x12]] 0x22		;this is the end position for the list of SUPER-admins
 	[[0x13]] 0x20 		;admin list start
 	[[0x20]] (ADDRESS)	;Contract is supreme admin over itself
@@ -83,7 +83,7 @@
 	[0x20] "nick"
 	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
 	(unless (OR (= @0x0 @@0x21)(= @@0x21 0))
-		[[@@0x21]]0
+		[[@@0x21]]0 ;remove old nick permissions
 	)
 	[[0x21]]@0x0 ;Copy nick into admin over
 	[[@@0x21]] 3 ;Nick gets admin rights

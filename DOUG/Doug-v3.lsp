@@ -45,6 +45,12 @@
 
 	[[0x20]]"doug"			; Add doug as first in name list (for consistancy) 
 	[["doug"]](ADDRESS)		; Register doug with doug
+
+;	[["olddoug"]]0xb74b44d220054b8362928fa5f3d1539cc6fa0bea ;Register Doug wit OLD doug (input address)
+;	[0x0]"reg"
+;	[0x20] "doug"
+;	(call @@"olddoug" 0 0 0x0 0x40 0 0) ;register for name
+
 	[0x0]"Doug - Revolution"
 ;	(call @@0x10 0 0 0x0 0x11 0 0) ;Register the name DOUG
 
@@ -156,6 +162,7 @@
 		}
 	)
 
+	[0x20] (calldataload 0) ;Get the first argument (again)
 
 	(when (= @0x20 "req") ;Request made
 		{
