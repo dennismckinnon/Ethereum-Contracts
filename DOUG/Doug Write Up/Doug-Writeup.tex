@@ -1,0 +1,148 @@
+\documentclass[]{article}
+% Time-stamp: <2014-04-21 20:56:53 (jonah)>
+
+% packages
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{mathrsfs}
+\usepackage{verbatim}
+\usepackage{braket}
+\usepackage{listings}
+\usepackage{pdfpages}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{subcaption}
+
+% Macros
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\N}{\mathbb{N}} % Integers
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\eval}{\biggr\rvert} %evaluated at
+\newcommand{\myvec}[1]{\mathbf{#1}} % vectors for me
+\newcommand{\vA}{\myvec{A}}
+\newcommand{\vB}{\myvec{B}}
+\newcommand{\vE}{\myvec{E}}
+\newcommand{\vS}{\myvec{S}}
+\newcommand{\vC}{\myvec{C}}
+\newcommand{\vR}{\myvec{R}}
+\newcommand{\va}{\myvec{a}}
+\newcommand{\vc}{\myvec{c}}
+\newcommand{\vr}{\myvec{r}}
+\newcommand{\vx}{\myvec{x}}
+\newcommand{\vJ}{\myvec{J}}
+\newcommand{\vj}{\myvec{j}}
+\newcommand{\vk}{\myvec{k}}
+\newcommand{\vy}{\myvec{y}}
+\newcommand{\vz}{\myvec{z}}
+\newcommand{\vn}{\myvec{n}}
+\newcommand{\vp}{\myvec{p}}
+\newcommand{\vm}{\myvec{m}}
+\newcommand{\vv}{\myvec{v}}
+\newcommand{\vw}{\myvec{w}}
+\newcommand{\vphi}{\myvec{\phi}}
+\newcommand{\vtheta}{\myvec{\theta}}
+
+% Total derivatives
+\newcommand{\diff}[2]{\frac{d #1}{d #2}} 
+\newcommand{\dd}[1]{\frac{d}{d #1}}
+% partial derivatives
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}} 
+\newcommand{\pdd}[1]{\frac{\partial}{\partial #1}} 
+% t derivatives 
+\newcommand{\dt}[1]{\frac{d #1}{dt}}
+\newcommand{\ddt}{\frac{d}{dt}}
+\newcommand{\dtt}{\frac{d^2}{dt^2}}
+\newcommand{\ddtt}[1]{\frac{d^2 #1}{dt^2}}
+\newcommand{\pt}[1]{\frac{\partial #1}{\partial t}}
+\newcommand{\ppt}{\frac{\partial}{\partial t}}
+\newcommand{\ptt}{\frac{\partial^2}{\partial t^2}}
+% vector derivatives
+\newcommand{\grad}{\myvec{\nabla}}
+\newcommand{\divergence}{\grad \cdot}
+\newcommand{\curl}{\grad \times}
+\newcommand{\laplacian}{\nabla^2}
+
+% Preamble
+\author{Dennis McKinnon\\
+\textit{dennis.r.mckinnon@gmail.com}}
+\title{DOUG: The Decentralized Organization Upgrade Guy}
+\date{Thursday, April 25, 2014}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+  In this work, we numerically generate measurements of a free massive
+  scalar field at all points in space for both flat Minkowski
+  spacetime and inflationary Friedmann-Lemaitres-Robertson-Walker
+  spacetimes. We first quantize the field in the Heisenberg picture and
+  then calculate fluctuations of the field amplitude in the
+  Schrodinger picture. We attain strong numerical support for the
+  analytic calculations of \cite{Kempf} and \cite{MukhanovWinitzki} in
+  Minkowski space and weak numerical support for their analytic
+  calculations in an inflationary de Sitter-like spacetime.
+\end{abstract}
+
+\section{Introduction}
+\label{sec:intro}
+
+At this point anyone who has been soaked in crypto-systems be it Bitcoin, an Alt-coin or Ethereum has heard of DAOs/DACs. For those few who haven't heard about DAOs yet, DAO stands for Decentralized Autonomous Organization. Though agreement on what qualifies as a DAO differs from person to person, almost everyone agrees that DAOs are the end goal of decentralized crypto-systems. For me a the two most important letters of DAO are AO. At this point with a platform like Ethereum, the D is pretty well taken care of (though many interesting particular problems still exist eg. Proof of custody). A successful DAO must then focus on being an organization of people who interact in a system which is self ruling. In other words this organization must not require any particularly special third party in order to operate or more importantly change how it operates.
+
+Despite the amount of attention DAOs are getting, there has been limited progress towards actual implementations of them. Though I should note at this point that according to my definition above, society its self is a DAO going all the way up to governments. There is no outside party which is explicitly running things (Though most probably agree that this DAO is not particularly well set up in terms of evenish distribution of power).
+
+This brings me to DOUG. To best understand DOUG let me make it clear, DOUG is not a DAO. DOUG might be best described as a design philosophy on how to construct DAOs. I go into more details of the functioning of a DOUG below but the basic idea is that DOUG serves the purpose of making a DAO adaptable in a manner which does not require any specific third party to be responsible for the changes.
+
+\section{DOUG Theory}
+\label{sec:QFT:minkowski}
+
+\subsection{Motivation}
+\label{sec:Minkowski:motivation}
+
+The motivation behind DOUG is that when designing a large DAO, there are going to be times when you wish to modify a particular aspect of the DAO without starting from scratch. I expect most DAOs will be multi-contract structures (For the same reason that most applications are not single files). If this is the case in order for a contract to be replaced and still be useful its relationships to every other contract must be maintained. To this end DOUG offloads this responsibility into a central location. 
+
+\subsection{Specifics}
+\label{sec:Minkowski:theory}
+
+DOUG acts like a name registration for contracts associated with the DAO. Instead of contracts in the DAO keeping track of addresses, they simply use names (or roles if you rather). DOUG keeps track of the contract currently associated to a name or role. When a the DAO wishes to substitute one contract for another, they get that contract to register for that name. DOUG then through some process (Implementation specific) decides if that new contract gets registered for that name.
+
+This decision making process can be offloaded to a contract which DOUG tracks (an easily swappable vote tacking type system)
+
+The following treatment follows \cite{Kempf} but draws a little bit
+from \cite{MukhanovWinitzki}. While \cite{Kempf} and
+\cite{MukhanovWinitzki} treat a more difficult problem where there are
+no Dirichlet boundary conditions, we still use them as a guide for our
+study. In Minkowski space, the Klein-Gordon equation for a scalar
+field $\phi$ takes the form
+\begin{equation}
+  \label{eq:Minkowski:KG}
+  \left(\partial_t^2 - \Delta + m^2\right)\phi(\vx,t) = 0,
+\end{equation}
+where $\Delta=\partial_i\partial^i\ \forall\ i\in\{1,2,3\}$ is the
+Laplace operator in space and $m$ is the mass
+\cite{Kempf,MukhanovWinitzki}. To avoid an infrared divergence and to
+make computation easier, we impose that our field live in a
+three-dimensional cube with length scale $L$
+\begin{equation}
+  \label{eq:Minkowski:domain}
+  \Omega = \left[0,L\right]\times\left[0,L\right]\times\left[0,L\right]
+\end{equation}
+and Dirichlet boundary conditions \cite{Kempf}:
+\begin{equation}
+  \label{eq:Dirichlet:Boundary}
+  \phi(\vx,t)\eval_{\partial\Omega} = 0.
+\end{equation}
+If we insist that $L$ be very large, the boundary conditions we impose
+should have no effect on the dynamics in the bulk \cite{Kempf,MukhanovWinitzki}.
+
+
+
+%Bibliography
+\bibliography{qft_project}
+\bibliographystyle{hunsrt}
+
+\end{document}

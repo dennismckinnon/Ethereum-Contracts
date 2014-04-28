@@ -260,7 +260,7 @@
 						{
 							;Pollcodes Contract registered. Call it.
 							[0x20]"inlist"
-							(call @@"doug" 0 0 0x20 0x40 0 0x20
+							(call @@"doug" 0 0 0x20 0x40 0 0x20)
 
 							[0x100]"create"
 							(if (= @0x0 0) ;If there is no contract registered to that name
@@ -271,9 +271,13 @@
 							(call @@"pollcodes" 0 0 0x100 0x40 0x80 0x20) ; Call the pollcodes contract returns address of requested poll to [0x80]
 
 							;Construct linked list entry
-							[[@0x80]](CALLER) ;Stick contract in first slot
-							[[(+ @@0x16 1)]] @0x80 ;Set previous head to point here
-							[[0x16]]@0x80 ;Set the new head to point here
+							(when @0x80
+								{
+									[[@0x80]](CALLER) ;Stick contract in first slot
+									[[(+ @@0x16 1)]] @0x80 ;Set previous head to point here
+									[[0x16]]@0x80 ;Set the new head to point here
+								}
+							)
 						}
 					)
 				}
