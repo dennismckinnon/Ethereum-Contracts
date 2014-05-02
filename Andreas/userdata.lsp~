@@ -57,7 +57,7 @@
 	[[0x7]] "register with a DAO based on a"
 	[[0x8]] "DOUG cluster."
 	;For DOUG integration
-	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 ;Doug Address
+	[[0x10]] 0x701f77d1566c687cc02883fb87be4f63bd9ebfb1 ;Doug Address
 	;List data section
 	[[0x11]] 0x0										;Size of list
 	[[0x12]] 0x0										;Tail address

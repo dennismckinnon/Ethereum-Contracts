@@ -34,12 +34,13 @@
 ;
 ; "reg" "name" - register the callers nickname "name" with the contract, if possible (if name is available etc.).
 ; "dereg" - deregister the nickname held by the caller (if any)
-; "dereg" "name" - deregister the nickname "name". This is ADMIN ONLY, and can only be done to non-admin nicks.
+; "dereg""name" - deregister the nickname "name". This is ADMIN ONLY, and can only be done to non-admin nicks.
 ; "promote" "name" - bump the user up 1 level. Nobody can promote a user beyond his own level.
 ; "protome" "name" - This bumps the nick holder up to the caller level, if caller is higher. protome = "promote to me"
 ; "demote" "name" - Brings a user down a level. Only possible if caller is higher level then nick owner.
 ; "fulldemote" "name" - Brings a user down to level 1 - the lowest possible level. Only possible if caller level > nick holder level.
-; "getlevel" "name" - Get the admin level of nick holder.
+; "getpriv" "name" - Get the the user privileges (currently "level") of the nick holder.
+; "getnick" address - Get the user nick of an address.
 ; "kill" - kills the contract. Only callable by the creator.
 
 ; INIT
@@ -62,9 +63,9 @@
 	[[0x12]] 0x0										;Tail address
 	[[0x13]] 0x0										;Head address
 	
-	;[0x0] "reg"
-	;[0x20] "userdata"
-	;(call @@0x10 0 0 0x0 0x40 0x0 0x20) ;Register with DOUG
+	[0x0] "reg"
+	[0x20] "userdata"
+	(call @@0x10 0 0 0x0 0x40 0x0 0x20) ;Register with DOUG
 
 	;Create a 'dummy' nick to use as permanent list tail. It never goes away, which means we never have
 	;to check if the list is empty when adding or removing elements (saves some processing). 
@@ -178,7 +179,7 @@
 	(when (AND (= @0x0 "dereg") (> @0x20 0x20) ) ; When de-regging by name.
 		{
             [0x40] @@(- @0x20 1) ; Check nick holders level.
-			[0x60] @@(- @@(caller) 1) ; Check callers level
+			[0x60] @@(- @@(caller) 1) ; Check callers level.
 
 			(unless (> @0x60 @0x40) (stop) )
 			
@@ -281,13 +282,19 @@
 			[[@0x40]] 1 ; Set nick holder level to 1
 			[0x0] 1
 			(return 0x0 0x20)
+		} ; end when body
+	) ;end when
+
+	(when (AND (= @0x0 "getpriv") (> @0x20 0x20) ) ;Get user priveleges
+		{
+			(return @@(- @0x20 1) 0x20)
 
 		} ; end when body
 	) ;end when
 
-	(when (AND (= @0x0 "getlevel") (> @0x20 0x20) ) ;Get user level
+	(when (AND (= @0x0 "getnick") (> @0x20 0x20) ) ;Get user nick (if any)
 		{
-			(return @@(- @0x20 1) 0x20)
+			(return @@ @0x20 0x20)
 
 		} ; end when body
 	) ;end when
