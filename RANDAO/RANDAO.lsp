@@ -153,9 +153,22 @@
 							[[@@(+ @0x0 @0x20)]](+ @@ @@(+ @0x0 @0x20) 1) ;they failed they get a reputation penalty
 						}
 					)
+					;Delete values
+					[[(+ @0x0 @0x20)]]0
+					[[(+ (+ @0x0 @0x20) 1)]]0
+					[[(+ (+ @0x0 @0x20) 2)]]0
 				}
 			)
 			[0x100](SHA3 0x120 @0x100)
+			;delete and relink
+			[[(+ @@ (+ @0x0 1) 2)]]@@(+ @0x0 2) ;Set previous next to this next
+			(when @@(+ @0x0 2) [[(+ @@ (+ @0x0 2) 1)]]@@(+ @0x0 1)) ;Set next previous to this previous
+			[[@0x0]]0
+			[[(+ @0x0 1)]]0
+			[[(+ @0x0 2)]]0
+			[[(+ @0x0 3)]]0
+			[[(+ @0x0 4)]]0
+			[[(+ @0x0 5)]]0 ;Clear out
 			(return 0x100 0x20) ;Return the random number
 		}
 	)
