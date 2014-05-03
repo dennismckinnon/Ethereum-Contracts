@@ -200,6 +200,17 @@
 	(when (= (calldataload 0) "deregister")
 		{
 			;deregister an existing active participant
+			[0x0]@@(+ (CALLER) 1)
+			[[@0x0]]@@ @@0x14
+			[[(+ @@ @@0x14 1)]]@0x0
+			[[@@0x14]]0
+			[[0x14]]=(- @@0x14 1)
+		}
+	)
+	
+	(when (= (calldataload 0) "claim")
+		{
+			(call (CALLER) @@(+ (CALLER) 2) 0 0 0 0 0)
 		}
 	)
 }
