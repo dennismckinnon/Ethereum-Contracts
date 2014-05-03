@@ -73,9 +73,12 @@
 		}
 	)
 	
-	(when (= (calldataload 0) "submit")
+	(when (= (calldataload 0) "submit") ;Format ["submit" 0xrequestballot value]
 		{
-		
+			;get phase
+			;find user in list
+			;if it is time for this value to be submitted allow it
+			;else reject
 		}
 	)
 	
