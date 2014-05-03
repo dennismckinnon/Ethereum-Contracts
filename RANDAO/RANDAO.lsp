@@ -141,13 +141,21 @@
 				{
 					[@0x100]@@(+ (+ @0x0 @0x20) 1) ;copy value into memory
 					[0x100](+ @0x100 0x20) ;Increment pointer
-					(when @@(+ (+ @0x0 @0x20) 2)
+					(if @@(+ (+ @0x0 @0x20) 2)
 						{
+							(when (> @@ @@(+ @0x0 @0x20) 1)
+								[[@@(+ @0x0 @0x20)]](- @@ @@(+ @0x0 @0x20) 1) ;they failed they get a reputation boost
+							)
 							[[(+ @@(+ @0x0 @0x20) 2)]](+ @@(+ @@(+ @0x0 @0x20) 2) @@0x15) ;Increase the user's balance 
+						}
+						{
+							[[@@(+ @0x0 @0x20)]](+ @@ @@(+ @0x0 @0x20) 1) ;they failed they get a reputation penalty
 						}
 					)
 				}
 			)
+			[0x100](SHA3 0x120 @0x100)
+			(return 0x100 0x20) ;Return the random number
 		}
 	)
 	
