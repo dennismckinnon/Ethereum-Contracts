@@ -43,7 +43,8 @@
 			(when (< @0x80 4) [0x80]4) ;Set to soonest return time
 			
 			;Create new request entry (this needs to be in a linked list) (hash block number or something in order to get link list addresses
-			[0x0] SHA3(TIMESTAMP) ;WRONG
+			[0x0] (TIMESTAMP)
+			[0x0] (SHA3 0x0 0x20)
 			[[@0x0]](CALLER) ;Store caller at first slot (s0)
 			[[(+ @0x0 1)]] @@0x10 ;previous pointer
 			[[(+ @@0x10 2)]]@0x0 ;Set previous pointer to this new entry
