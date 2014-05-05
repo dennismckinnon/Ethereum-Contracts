@@ -60,7 +60,7 @@
 	[[0x9]] "ovided upon entry creation"
 
 
-	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9		;Hardcode in a first DOUG
+	[[0x10]] 0xfc87f9b92b37b9b6133a22ff3352f72996de77eb 	;Hardcode in a first DOUG
 	[[0x11]] 0x20 											;Start of infohash list
 	[[0x12]] @@0x11											;infohash list pointer
 	[[0x13]] 32						 						;Number of segments per item
@@ -125,6 +125,7 @@
 				{
 					;If its old then fetch the locator
 					[0x60] (+ @@ @0xA0 2) ;+2 skip infohash and caller fields
+					(unless (= (CALLER) @@(- @0x60 1)) (stop)) ;Only the creator can edit
 				}
 			)
 
@@ -234,6 +235,8 @@
 			[0x60] @@ @0xA0 ;Fetch Locator
 			[0x80] (- @@0x12 @@0x13) ;Locator for item to move over
 
+			(unless(OR (= @0x0 1)(= (CALLER) @@(+ @0x60 1)))(stop)) ; must be admin or creator
+
 			[[@0xA0]] 0; Clear out
 
 			[0xC0] (+ @@ @0x80 @@0x14) ;This is the address the infohash pointer
@@ -247,7 +250,7 @@
 						}
 					)
 					[[0x12]] @0x80 ;Change the data pointer
-					[[0x15]] 0;Decrement counter
+					[[0x15]] (- @@0x15 1);Decrement counter
 				}
 				{
 					[[@0xC0]] @0x60 ;Copy the new locator for this item
