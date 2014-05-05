@@ -46,13 +46,13 @@
 	[[0x20]]"doug"			; Add doug as first in name list (for consistancy) 
 	[["doug"]](ADDRESS)		; Register doug with doug
 
-;	[["olddoug"]]0xb74b44d220054b8362928fa5f3d1539cc6fa0bea ;Register Doug wit OLD doug (input address)
+;	[["olddoug"]]0xb74b44d220054b8362928fa5f3d1539cc6fa0bea ;Register Doug with OLD doug (input address)
 ;	[0x0]"reg"
 ;	[0x20] "doug"
-;	(call @@"olddoug" 0 0 0x0 0x40 0 0) ;register for name
+;	(call 0 @@"olddoug" 0 0x0 0x40 0 0) ;register for name
 
 	[0x0]"Doug - Revolution"
-;	(call @@0x10 0 0 0x0 0x11 0 0) ;Register the name DOUG
+;	(call 0 @@0x10 0 0x0 0x11 0 0) ;Register the name DOUG
 
 	;Linked list
 	[[0x15]] 0x17 ; Set tail
@@ -100,7 +100,7 @@
 					;Loop until the current position is 0 (previous pointer pointed to 0)
 					;check each poll if it has closed and what the result is
 					[0x20]"check"
-					(call @0x0 0 0 0x20 0x20 0x40 0x20)
+					(call 0 @0x0 0 0x20 0x20 0x40 0x20)
 
 
 					[0x80] @@(+ @0x0 1) ;get next address from curren next pointer
@@ -124,7 +124,7 @@
 							;Add to list... then delete link
 							[0x20] "inlist"
 							[0x40] @@ @@ @0x0 ;copy the name (name is stored at the address of the contract in question at 0x0)
-							(call @@"doug" 0 0 0x20 0x40 0xC0 0x20)
+							(call 0 @@"doug" 0 0x20 0x40 0xC0 0x20)
 
 							[[@0x40]] (CALLER);			;Register contract address
 
@@ -137,9 +137,9 @@
 
 							(when (= @0x40 "doug")
 								{
-									(call @@0x10 0 0 0 0 0 0) ;clear the name registration
+									(call 0 @@0x10 0 0 0 0 0) ;clear the name registration
 									[0x1A0] "claim"
-									(call @@"doug" 0 0 0x1A0 0x20 0 0) ;Call new doug to tell him to claim name (It doesn't matter if new doug responds to this)
+									(call 0 @@"doug" 0 0x1A0 0x20 0 0) ;Call new doug to tell him to claim name (It doesn't matter if new doug responds to this)
 								}
 							)
 
@@ -174,7 +174,7 @@
 					(return 0x60 0x40) ;return the address
 				}
 				{	;If this doug is not the head of the doug chain pass the request forward to doug
-					(call @@"doug" 0 0 0x20 0x40 0x60 0x40) ;Get the answer from Doug
+					(call 0 @@"doug" 0 0x20 0x40 0x60 0x40) ;Get the answer from Doug
 					(return 0x60 0x40) ;Return
 				}
 			)
@@ -260,7 +260,7 @@
 						{
 							;Pollcodes Contract registered. Call it.
 							[0x20]"inlist"
-							(call @@"doug" 0 0 0x20 0x40 0 0x20)
+							(call 0 @@"doug" 0 0x20 0x40 0 0x20)
 
 							[0x100]"create"
 							(if (= @0x0 0) ;If there is no contract registered to that name
@@ -268,7 +268,7 @@
 								[0x120]"poll2" ;ask for polltype 2 
 							)
 							[0x80]0 ;Safety measure in case something goes wrong
-							(call @@"pollcodes" 0 0 0x100 0x40 0x80 0x20) ; Call the pollcodes contract returns address of requested poll to [0x80]
+							(call 0 @@"pollcodes" 0 0x100 0x40 0x80 0x20) ; Call the pollcodes contract returns address of requested poll to [0x80]
 
 							;Construct linked list entry
 							(when @0x80

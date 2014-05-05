@@ -70,24 +70,24 @@
 
 	[0x0] "reg"
 	[0x20] "magdb"
-	(call @@0x10 0 0 0x0 0x40 0 0x20) ;Register for name "magdb" with doug
+	(call 0 @@0x10 0 0x0 0x40 0 0x20) ;Register for name "magdb" with doug
 }
 {
 	;Get doug from doug
 	[0x0]"req"
 	[0x20] "doug"
-	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
+	(call 0 @@0x10 0 0x0 0x40 0x0 0x20)
 	[[0x10]]@0x0 ;Copy new doug over
 
 	;Update the User Permissions manager (UPM)
 	[0x0] "req"
 	[0x20] "user"
-	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
+	(call 0 @@0x10 0 0x0 0x40 0x0 0x20)
 	[[0x16]]@0x0 ;Copy new UPM over
 
 	[0x40] "check"
 	[0x60] (CALLER)
-	(call @@0x16 0 0 0x40 0x40 0x0 0x20) ;Call user manager and find out if the caller has permissions (0x0)
+	(call 0 @@0x16 0 0x40 0x40 0x0 0x20) ;Call user manager and find out if the caller has permissions (0x0)
 	(unless @0x0 (stop)) ;Not a member stop
 
 	[0x0](MOD(DIV @0x0 2)2);Second Digit (if they are an admin = 1)
@@ -99,7 +99,7 @@
 	;Admin suicide (Format: "kill")
 	(when (AND (= @0x20 "kill") (= @0x0 1)) ;Admin and say kill suicide + deregister
 		{
-;			(call 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 0 0 0 0 0 0); INSTEAD OF NAME REGISTER DEREGISTER from DOUG (very complicated)
+;			(call 0 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 0 0 0 0 0); INSTEAD OF NAME REGISTER DEREGISTER from DOUG (very complicated)
 			(suicide @@0x10)
 		}
 	)
