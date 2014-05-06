@@ -210,7 +210,7 @@
 	
 	(when (= (calldataload 0) "claim")
 		{
-			(call (CALLER) @@(+ (CALLER) 2) 0 0 0 0 0)
+			(call (- (GAS) 100) (CALLER) @@(+ (CALLER) 2) 0 0 0 0)
 		}
 	)
 }

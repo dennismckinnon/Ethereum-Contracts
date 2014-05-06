@@ -1,6 +1,12 @@
 ;pollcodes
+
+;THis is a helper contract for Doug-v3 which has special properties
+;It creates polls for doug when doug wishes to know if a name should be given to a new contract
+;This role will be assumed by the ACL in DOUG-v4 and will be more general
+;but what can you do?
+
 {
-	[[0x1]] 0xDOUG'S ADDRESS ;Doug's Address
+	[[0x1]] 0xDOUGADDRESS ;Doug's Address NOTE: If you change DOUGADDRESS here you also have to edit it below.(until i figure out how to overwrite specific chunks)
 
 	;Doug Update (JIC)
 	[0x0]"req"
@@ -24,7 +30,7 @@
 					[0x0](LLL
 						{
 							;init section
-							[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9 ;Doug's Address (every spawned contract knows this doug but will immediately search for a newer one.)
+							[[0x10]] 0xDOUGADDRESS ;Doug's Address (every spawned contract knows this doug but will immediately search for a newer one.)
 							[0x0]"req"
 							[0x20] "doug"
 							(call 0 @@0x10 0 0x0 0x40 0x0 0x20)
@@ -103,6 +109,4 @@
 			)
 		}
 	)
-
-	
 }
