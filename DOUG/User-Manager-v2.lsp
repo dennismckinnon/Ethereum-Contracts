@@ -59,7 +59,7 @@
 	[[0x8]] "ely and for any contracts reques"
 	[[0x9]] "ting from it."
 
-	[[0x10]] 0xfc87f9b92b37b9b6133a22ff3352f72996de77eb 	;Doug's address
+	[[0x10]] 0x9e4d58a9f74d7a5752c712210a9ffbe612f2609f 	;Doug's address
 	[[0x11]] 0x23 		;Admin member pointer
 	[[0x12]] 0x22		;this is the end position for the list of SUPER-admins
 	[[0x13]] 0x20 		;admin list start
@@ -70,18 +70,18 @@
 	[[(CALLER)]] 3 		;Admin+normal
 	[0x0] "reg"
 	[0x20] "user"
-	(call @@0x10 0 0 0x0 0x40 0x0 0x20); Register with DOUG
+	(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x0 0x20); Register with DOUG
 }
 {
 	;Despite the fact that this contract has no dependancies Going to keep DOUG updated regardless
 	[0x0]"req"
 	[0x20] "doug"
-	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
+	(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x0 0x20)
 	[[0x10]]@0x0 ;Copy new doug over
 
 	[0x0] "req"
 	[0x20] "nick"
-	(call @@0x10 0 0 0x0 0x40 0x0 0x20)
+	(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x0 0x20)
 	(unless (OR (= @0x0 @@0x21)(= @@0x21 0))
 		[[@@0x21]]0 ;remove old nick permissions
 	)
@@ -119,7 +119,7 @@
 		{
 			[0x40] "check"
 			[0x60] (CALLER)
-			(call (ADDRESS) 0 0 0x40 0x40 0 0x20) ;Recusive permissions for this contract!
+			(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0 0x20) ;Recusive permissions for this contract!
 			(when (= @0x0 0) (stop)) ;if it returns 0 no permissions
 		}
 	)
@@ -133,7 +133,7 @@
 		{
 			[0x40] "getadm"
 			[0x60] (CALLER)
-			(call (ADDRESS) 0 0 0x40 0x40 0x140 0x20) ;Get Admin number
+			(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x140 0x20) ;Get Admin number
 		}
 	)
 
@@ -171,11 +171,11 @@
 			[0x20] 0 ;Clear for return value
 			[0x40] "check"
 			[0x60] (calldataload 32) ;Get second data argument
-			(call (ADDRESS) 0 0 0x40 0x40 0x160 0x20) ;
+			(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x160 0x20) ;
 			(if (= (MOD(DIV @0x160 2)2) 1) ;If the target is an admin
 				{
 					[0x40] "getadm"
-					(call (ADDRESS) 0 0 0x40 0x40 0x160 0x20) ;Get the target's admin number (put at 0x160)
+					(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x160 0x20) ;Get the target's admin number (put at 0x160)
 					(when (<= @0x140 @0x160) ;If you are a higher Admin then the target
 						{
 							(for [0x200](+ @@0x13 @0x160) (< @0x200 @@0x11) [0x200](+ @0x200 1) ;Start at admins location and do delete and shuffle
@@ -216,11 +216,11 @@
 			[0x20] 0 ;Clear for return value
 			[0x40] "check"
 			[0x60] (calldataload 32) ;Get second data argument
-			(call (ADDRESS) 0 0 0x40 0x40 0x160 0x20) ;
+			(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x160 0x20) ;
 			(if (= (MOD(DIV @0x160 2)2) 1) ;If the target is an admin
 				{
 					[0x40] "getadm"
-					(call (ADDRESS) 0 0 0x40 0x40 0x160 0x20) ;Get the target's admin number (put at 0x160)
+					(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x160 0x20) ;Get the target's admin number (put at 0x160)
 					(when (<= @0x140 @0x160) ;If you are a higher Admin then the target
 						{
 							(for [0x200]@0x160 (< @0x200 @@0x11) [0x200](+ @0x200 1) ;Start at admins location and do delete and shuffle
@@ -260,13 +260,13 @@
 			[0x40] "check"
 			[0x60] (calldataload 32) ;Get second data argument
 			[0xA0] (calldataload 64) ;Get third data argument
-			(call (ADDRESS) 0 0 0x40 0x40 0xC0 0x20) ;Get the current status of the target
+			(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0xC0 0x20) ;Get the current status of the target
 			(when @0x60
 				{
 					(when (MOD(DIV @0xC0 2)2) ;This person is an admin so delete first and then add
 						{
 							[0x40] "getadm"
-							(call (ADDRESS) 0 0 0x40 0x40 0x160 0x20)
+							(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x160 0x20)
 							[0x20] 0;
 
 							;YOU MUST DO THIS CHECK NOW BECAUSE IN THE RECURSIVE CALL THIS CONTRACT WILL BE THE CALLER AND THEY HAVE 
@@ -274,7 +274,7 @@
 							(when (<= @0x140 @0x160) ;If you are a higher Admin then the target 
 								{
 									[0x40] "deladm"
-									(call (ADDRESS) 0 0 0x40 0x40 0x20 0x20) ;Call this address to delete the user we can now add them back in
+									(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x20 0x20) ;Call this address to delete the user we can now add them back in
 								}
 							)
 							(unless @0x20 (return 0x20 0x20)) ;if the deletion failed stop.
