@@ -211,11 +211,13 @@
 
 	;Delete Admin member (must be an admin that is higher then the member you re deleting) (Format: "deladm" 0xMemberaddress)
 	;Note: This is REALLY costly since order must be maintained
-	(when (AND (= @0x20 "delmem") (= @0x120 1))
+
+	[0x60] (calldataload 32) ;Get 0xMemberAddress
+	(when (AND (= @0x20 "delmem") (OR (= @0x120 1) (= @0x60 (CALLER))))
 		{
 			[0x20] 0 ;Clear for return value
 			[0x40] "check"
-			[0x60] (calldataload 32) ;Get second data argument
+			
 			(call (- (GAS) 100) (ADDRESS) 0 0x40 0x40 0x160 0x20) ;
 			(if (= (MOD(DIV @0x160 2)2) 1) ;If the target is an admin
 				{
