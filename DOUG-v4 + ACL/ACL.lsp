@@ -1,7 +1,7 @@
 ;ACL
 
 ;Default behaviour: If the Contract name has been registered but the rule for a specific permission level
-;					does not yet exist. The the permission is granted automatically.
+;					does not yet exist. The the permission is automatically rejected.
 ;					If the contract name does not exist then the request is automatically rejected
 ;
 ;Use:				Requesting permissions work for any contract's permissions. Setting permissions requires
