@@ -161,9 +161,11 @@
 
 	(when (= @0x0 "register")
 		{
-			[0x20] (calldataload 0x20) 		;Get "name"
-			[0x40] (calldataload 0x40)		;Get Target address
-			(unless @0x40 [0x40](CALLER))	;If Target address not provided Default: (CALLER)
+			[0x20] (calldataload 0x20) 		; Get "name"
+			[0x40] (calldataload 0x40)		; Get Target address
+			(unless @0x40 [0x40](CALLER))	; If Target address not provided Default: (CALLER)
+
+			(unless (&& (> @0x20 0x20)(> @0x40 0x20)) (STOP)); Prevent out of bounds registrations
 
 			[0x60] 0 	;where permission will be stored (cleared out just to be safe)
 			(if (&& @@"ACL" @@ @0x20) If ACL is registered AND the name is taken
@@ -182,9 +184,10 @@
 			(unless @0x60 (STOP)) ;If permissions are not 1 then stop
 
 			
-			(if (= @@(+ @0x20 1) 0) ;When a previous doesn't exist (new entry)
+			(if (= @@ @0x20 0) ;name does not exist yet
 				{
-					;Perform appending to list
+					;Perform appending to list (check that there is space)
+					(unless (&& (= (- @0x20 2) 0) (= (- @0x20 1) 0) (= (+ @0x20 1) 0) (= (+ @0x20 2) 0) (= @@ @0x40 0)) (STOP)) ; Check enough space 
 					[[@0x20]] @0x40 ;Store target at name
 					[[(+ @0x20 1)]] @@0x16 	;Set previous to value in head
 					[[(+ @@0x16 2)]] @0x20 	;Set head's next to current name
@@ -192,10 +195,13 @@
 				}
 				{
 					;Don't append but push name history down
+					(unless (= @@ @0x40 0) (STOP)) ;Ensure writing to target won't overwrite anything
 					[[@0x40]] @@ @0x20 	;Copy previous contract to pointer of new contract
 					[[@0x20]] @0x40 	;Register target to name
 				}
 			)
+			[0xC0]1
+			(return 0xC0 0x20)
 		}
 	)
 
