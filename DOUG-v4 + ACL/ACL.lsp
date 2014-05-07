@@ -20,7 +20,7 @@
 ;					- Returns: Permission number requested
 ;
 ;Request Permission - Permission needed: 0
-;					- Form: "req" "Permission Name" #permission <0xTargetAddress>
+;					- Form: "request" "Permission Name" #permission <0xTargetAddress>
 ;					- Returns: Nothing
 ;
 ;Set Permission 	- Permission needed: 1
@@ -51,9 +51,9 @@
 ;	[[0x0]] 0x88554646AB						;metadata notifier
 ;	[[0x1]] (CALLER)							;contract creator
 ;	[[0x2]] "Dennis McKinnon"					;contract Author
-;	[[0x3]] 0x18042014							;Date
-;	[[0x4]] 0x001003000							;version XXX.XXX.XXX
-;	[[0x5]] "doug" 								;Name
+;	[[0x3]] 0x07052014							;Date
+;	[[0x4]] 0x001000000							;version XXX.XXX.XXX
+;	[[0x5]] "ACL" 								;Name
 ;	[[0x6]] "12345678901234567890123456789012"	;Brief description (not past address 0xF)
 ;	[[0x6]] "The Access Control List (ACL) is"
 ;	[[0x7]] "a unified method by which to att"
@@ -67,6 +67,8 @@
 ;	[[0xF]] "located."	
 
 	[[0x10]] 0xDOUGADDRESS	;Doug's Address
+	[[0x11]] 0 				;Current allocation row
+	[[0x12]] 0 				;Current allocation start position
 }
 {
 	;Doug Update
@@ -91,7 +93,7 @@
 		}
 	)
 
-	(when (= @0x0 "req") 		;Form: "req" "Permission Name" #permission <0xTargetAddress>
+	(when (= @0x0 "request") 	;Form: "req" "Permission Name" #permission <0xTargetAddress>
 		{
 			;Request the permission. If Target not provided defaults to CALLER
 		}
