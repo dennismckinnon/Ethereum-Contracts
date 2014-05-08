@@ -57,6 +57,7 @@
 	;Linked list
 	[[0x15]] 0x17 ; Set tail
 	[[0x16]] 0x17 ;	Set head
+	[[0x17]] 0x17
 
 }
 {
@@ -76,7 +77,6 @@
 
 	;Body
 	[0x20] (calldataload 0) ;Get the first argument
-
 	;NOTE THIS CHECK HAPPENS BEFORE THE UPDATE BECAUSE THE UPDATE CALLS IT AND WE DON'T WANT AN INFINITE RECURSION LOOP
 	(when (= @0x20 "inlist") ;get passed a name checks if its in the list
 		{
