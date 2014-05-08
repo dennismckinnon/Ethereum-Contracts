@@ -6,31 +6,32 @@
 ;but what can you do?
 
 {
-	[[0x1]] 0xDOUGADDRESS ;Doug's Address NOTE: If you change DOUGADDRESS here you also have to edit it below.(until i figure out how to overwrite specific chunks)
+	[[0x0]] 0xDEADBEEF ;overwrite canary
+	[[0x1]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b ;Doug's Address NOTE: If you change DOUGADDRESS here you also have to edit it below.(until i figure out how to overwrite specific chunks)
 
 	;Doug Update (JIC)
 	[0x0]"req"
 	[0x20]"doug"
-	(call (- (GAS) 100) @@0x0 0 0x0 0x40 0x40 0x40)
+	(call (- (GAS) 100) @@0x1 0 0x0 0x40 0x40 0x40)
 	[[0x1]]@0x40
 
 	;DOUG registration
 	[0x0]"reg"
 	[0x20]"pollcodes"
-	(call (- (GAS) 100) @@0x0 0 0x0 0x40 0x0 0x0)
+	(call (- (GAS) 100) @@0x1 0 0x0 0x40 0x0 0x0)
 }
 {
 	[0x0](calldataload 0)
 	(when (= @0x0 "create")
 		{
 			[0x0](calldataload 0x20)
-			(when (= @0x0 "poll1")
+			(when (= @0x0 "poll2")
 				{
 					;This is poll for if name already exists
 					[0x0](LLL
 						{
 							;init section
-							[[0x10]] 0xDOUGADDRESS ;Doug's Address (every spawned contract knows this doug but will immediately search for a newer one.)
+							[[0x10]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b ;Doug's Address (every spawned contract knows this doug but will immediately search for a newer one.)
 							[0x0]"req"
 							[0x20] "doug"
 							(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x40 0x20)
@@ -50,7 +51,7 @@
 									[0x40] 0 ;clean
 									(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x40 0x20)
 
-									(when (AND (= @0xE0 (CALLER)) (= (calldataload 0) "kill")) ;clean up
+									(when (&& (= @0xE0 (CALLER)) (= (calldataload 0) "kill")) ;clean up
 										(suicide (CALLER))
 									)
 
@@ -88,7 +89,7 @@
 					(return 0x0 0x20) ;Return the address of the poll
 				}
 			)
-			(when (= @0x0 "poll2")
+			(when (= @0x0 "poll1")
 				{
 					;If the name has not been taken
 					[0x0](LLL

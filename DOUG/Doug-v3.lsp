@@ -186,7 +186,7 @@
 		{
 			[0x40](calldataload 0x20) ;Get the requested number
 			[0x0] (+ @@0x11 @0x40)
-			(if (AND (>= @0x0 @@0x11)(< @0x0 @@0x12))
+			(if (&& (>= @0x0 @@0x11)(< @0x0 @@0x12))
 				{
 					;Get the [name:contractID] pair
 					[0x60]@@ @0x0 ;Get name
@@ -228,7 +228,7 @@
 	;Register
 	;This can only happen if This Doug is top of the doug chain. Otherwise this doug simply serves
 	;To alert new contracts to the new doug.
-	(when (AND (=@0x20 "reg") (= @@"doug" (ADDRESS)))
+	(when (&& (=@0x20 "reg") (= @@"doug" (ADDRESS)))
 		{
 			[0x40](calldataload 0x20) ;Get the name they are requesting
 			(when (< @0x40 @@0x14)
@@ -242,7 +242,7 @@
 					[[(CALLER)]] @0x40 ;Store the requested name
 					(if (= @@"pollcodes" 0)
 						{
-							;The pollcodes contract has not beenregistered yet. Automatic acceptance of contracts
+							;The pollcodes contract has not been registered yet. Automatic acceptance of contracts
 							[[@0x40]] (CALLER);			;Register contract address
 
 							[0x20]"inlist"

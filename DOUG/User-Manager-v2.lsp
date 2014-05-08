@@ -59,7 +59,7 @@
 	[[0x8]] "ely and for any contracts reques"
 	[[0x9]] "ting from it."
 
-	[[0x10]] 0x9e4d58a9f74d7a5752c712210a9ffbe612f2609f 	;Doug's address
+	[[0x10]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b 	;Doug's address
 	[[0x11]] 0x23 		;Admin member pointer
 	[[0x12]] 0x22		;this is the end position for the list of SUPER-admins
 	[[0x13]] 0x20 		;admin list start
@@ -82,7 +82,7 @@
 	[0x0] "req"
 	[0x20] "nick"
 	(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x0 0x20)
-	(unless (OR (= @0x0 @@0x21)(= @@0x21 0))
+	(unless (|| (= @0x0 @@0x21)(= @@0x21 0))
 		[[@@0x21]]0 ;remove old nick permissions
 	)
 	[[0x21]]@0x0 ;Copy nick into admin over
@@ -96,7 +96,7 @@
 	;if not then assume they want to apply the operation to this contract.
 	;Recusively get their permissions before moving on to processing their command
 
-	(if (OR (= @0x20 "check")(= @0x20 "getadm"))
+	(if (|| (= @0x20 "check")(= @0x20 "getadm"))
 		{
 			(if (= @0x20 "check") 	;Get user permissions values
 				{
@@ -142,14 +142,14 @@
 
 ;Removed because no longer necessary
 ;	;Admin suicide (Format: "kill")
-;	(when (AND (= @0x20 "kill") (<= @0x140 @@0x12)) ;SUPER-Admin and say kill suicide + deregister
+;	(when (&& (= @0x20 "kill") (<= @0x140 @@0x12)) ;SUPER-Admin and say kill suicide + deregister
 ;		{
 ;			(suicide @@0x21)
 ;		}
 ;	)
 
 	;Admin modify superadmins level (Format: "modsal" #value)
-	(when (AND (= @0x20 "modsal") (<= @0x140 @@0x12)) ;SUPER-Admin and send modsal = modify super admin level
+	(when (&& (= @0x20 "modsal") (<= @0x140 @@0x12)) ;SUPER-Admin and send modsal = modify super admin level
 		{
 			[0x40](calldataload 32)
 			[0x20]0
@@ -166,7 +166,7 @@
 
 	;Make normal member (works for admin demotions too!) (Format: "regmem" 0xMemberaddress)
 	;Note: This is REALLY (for admins) costly since order must be maintained
-	(when (AND (= @0x20 "regmem") (= @0x120 1))
+	(when (&& (= @0x20 "regmem") (= @0x120 1))
 		{
 			[0x20] 0 ;Clear for return value
 			[0x40] "check"
@@ -213,7 +213,7 @@
 	;Note: This is REALLY costly since order must be maintained
 
 	[0x60] (calldataload 32) ;Get 0xMemberAddress
-	(when (AND (= @0x20 "delmem") (OR (= @0x120 1) (= @0x60 (CALLER))))
+	(when (&& (= @0x20 "delmem") (|| (= @0x120 1) (= @0x60 (CALLER))))
 		{
 			[0x20] 0 ;Clear for return value
 			[0x40] "check"
@@ -257,7 +257,7 @@
 
 	;Add/promote admin  (Format: "promem" 0xMemberaddress <position>) (empty postion means put at end of the list)
 	;This can promote any user to an admin position <= to the original caller
-	(when (AND (= @0x20 "regadm")(= @0x120 1)) ;Admin priveleges required
+	(when (&& (= @0x20 "regadm")(= @0x120 1)) ;Admin priveleges required
 		{
 			[0x40] "check"
 			[0x60] (calldataload 32) ;Get second data argument
@@ -325,7 +325,7 @@
 
 ;NO LONGER NECESSARY (I left it here because its the simplest function here now so good example)
 ;	;Register new admin (Format: "regadm" 0xMemberaddress)
-;	(when (AND (= @0x20 "regadm") (= @0x120 1))
+;	(when (&& (= @0x20 "regadm") (= @0x120 1))
 ;		{
 ;			[0x20] 0
 ;			[0x40] (calldataload 32) ;Get second data argument
