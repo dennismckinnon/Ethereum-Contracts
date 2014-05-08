@@ -264,8 +264,8 @@
 
 							[0x100]"create"
 							(if (= @0x0 0) ;If there is no contract registered to that name
-								[0x120]"poll1" ;ask for polltype 1 ;Default. Always should have a default for contracts with names you don't recognize
-								[0x120]"poll2" ;ask for polltype 2 
+								[0x120]"poll2" ;ask for polltype 1 ;Default. Always should have a default for contracts with names you don't recognize
+								[0x120]"poll1" ;ask for polltype 2 
 							)
 							[0x80]0 ;Safety measure in case something goes wrong
 							(call (- (GAS) 100) @@"pollcodes" 0 0x100 0x40 0x80 0x20) ; Call the pollcodes contract returns address of requested poll to [0x80]
