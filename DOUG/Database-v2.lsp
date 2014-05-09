@@ -60,7 +60,7 @@
 	[[0x9]] "ovided upon entry creation"
 
 
-	[[0x10]] 0x6207fbebac090bab3c91d4de0f4264b3338982b9		;Hardcode in a first DOUG
+	[[0x10]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b		;Hardcode in a first DOUG
 	[[0x11]] 0x20 											;Start of infohash list
 	[[0x12]] @@0x11											;infohash list pointer
 	[[0x13]] 32						 						;Number of segments per item

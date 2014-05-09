@@ -57,6 +57,7 @@
 	;Linked list
 	[[0x15]] 0x17 ; Set tail
 	[[0x16]] 0x17 ;	Set head
+	[[0x17]] 0x17
 
 }
 {
@@ -76,7 +77,6 @@
 
 	;Body
 	[0x20] (calldataload 0) ;Get the first argument
-
 	;NOTE THIS CHECK HAPPENS BEFORE THE UPDATE BECAUSE THE UPDATE CALLS IT AND WE DON'T WANT AN INFINITE RECURSION LOOP
 	(when (= @0x20 "inlist") ;get passed a name checks if its in the list
 		{
@@ -186,7 +186,7 @@
 		{
 			[0x40](calldataload 0x20) ;Get the requested number
 			[0x0] (+ @@0x11 @0x40)
-			(if (AND (>= @0x0 @@0x11)(< @0x0 @@0x12))
+			(if (&& (>= @0x0 @@0x11)(< @0x0 @@0x12))
 				{
 					;Get the [name:contractID] pair
 					[0x60]@@ @0x0 ;Get name
@@ -228,7 +228,7 @@
 	;Register
 	;This can only happen if This Doug is top of the doug chain. Otherwise this doug simply serves
 	;To alert new contracts to the new doug.
-	(when (AND (=@0x20 "reg") (= @@"doug" (ADDRESS)))
+	(when (&& (=@0x20 "reg") (= @@"doug" (ADDRESS)))
 		{
 			[0x40](calldataload 0x20) ;Get the name they are requesting
 			(when (< @0x40 @@0x14)
@@ -242,7 +242,7 @@
 					[[(CALLER)]] @0x40 ;Store the requested name
 					(if (= @@"pollcodes" 0)
 						{
-							;The pollcodes contract has not beenregistered yet. Automatic acceptance of contracts
+							;The pollcodes contract has not been registered yet. Automatic acceptance of contracts
 							[[@0x40]] (CALLER);			;Register contract address
 
 							[0x20]"inlist"
