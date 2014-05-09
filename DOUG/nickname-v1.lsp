@@ -37,7 +37,7 @@
 	[[0x7]] "create a nickname for himself,"
 	[[0x8]] "to use in a DAO."
 	;For DOUG integration
-	[[0x10]] 0xfc87f9b92b37b9b6133a22ff3352f72996de77eb ;Doug Address
+	[[0x10]] 0x9e4d58a9f74d7a5752c712210a9ffbe612f2609f ;Doug Address
 	;List data section
 	[[0x11]] 0x0										;Size of list
 	[[0x12]] 0x0										;Tail address

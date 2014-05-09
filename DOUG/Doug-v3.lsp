@@ -38,7 +38,7 @@
 	[[0xE]] "ding DOUG himself."
 
 	;Initialization
-	[[0x10]] 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 ;NameReg address
+	[[0x10]] 0x2d0aceee7e5ab874e22ccf8d1a649f59106d74e8 ;NameReg address
 	[[0x11]] 0x20 			; Name list start
 	[[0x12]] (+ @@0x11 1) 	; name list pointer (next free slot)
 	[[0x14]] 0xFFFF			; The smallest name allowed to be registered  
@@ -52,12 +52,11 @@
 ;	(call (- (GAS) 100) @@"olddoug" 0 0x0 0x40 0 0) ;register for name
 
 	[0x0]"Doug - Revolution"
-;	(call (- (GAS) 100) @@0x10 0 0x0 0x11 0 0) ;Register the name DOUG
+	(call (- (GAS) 100) @@0x10 0 0x0 0x11 0 0) ;Register the name DOUG
 
 	;Linked list
 	[[0x15]] 0x17 ; Set tail
 	[[0x16]] 0x17 ;	Set head
-	[[0x17]] 0x17
 
 }
 {
@@ -126,7 +125,7 @@
 							[0x40] @@ @@ @0x0 ;copy the name (name is stored at the address of the contract in question at 0x0)
 							(call (- (GAS) 100) @@"doug" 0 0x20 0x40 0xC0 0x20)
 
-							[[@0x40]] (CALLER);			;Register contract address
+							[[@0x40]] @@ @0x0;			;Register contract address
 
 							(when (= @0xC0 0) ;name not in list add it
 								{

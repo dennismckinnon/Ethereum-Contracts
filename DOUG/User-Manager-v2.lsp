@@ -59,7 +59,7 @@
 	[[0x8]] "ely and for any contracts reques"
 	[[0x9]] "ting from it."
 
-	[[0x10]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b 	;Doug's address
+	[[0x10]] 0x9e4d58a9f74d7a5752c712210a9ffbe612f2609f 	;Doug's address
 	[[0x11]] 0x23 		;Admin member pointer
 	[[0x12]] 0x22		;this is the end position for the list of SUPER-admins
 	[[0x13]] 0x20 		;admin list start

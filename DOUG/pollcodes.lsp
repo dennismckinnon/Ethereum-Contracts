@@ -7,7 +7,7 @@
 
 {
 	[[0x0]] 0xDEADBEEF ;overwrite canary
-	[[0x1]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b ;Doug's Address NOTE: If you change DOUGADDRESS here you also have to edit it below.(until i figure out how to overwrite specific chunks)
+	[[0x1]] 0x9e4d58a9f74d7a5752c712210a9ffbe612f2609f ;Doug's Address NOTE: If you change DOUGADDRESS here you also have to edit it below.(until i figure out how to overwrite specific chunks)
 
 	;Doug Update (JIC)
 	[0x0]"req"
@@ -31,7 +31,7 @@
 					[0x0](LLL
 						{
 							;init section
-							[[0x10]] 0x9c0182658c9d57928b06d3ee20bb2b619a9cbf7b ;Doug's Address (every spawned contract knows this doug but will immediately search for a newer one.)
+							[[0x10]] 0x9e4d58a9f74d7a5752c712210a9ffbe612f2609f ;Doug's Address (every spawned contract knows this doug but will immediately search for a newer one.)
 							[0x0]"req"
 							[0x20] "doug"
 							(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x40 0x20)
@@ -51,14 +51,14 @@
 									[0x40] 0 ;clean
 									(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x40 0x20)
 
-									(when (&& (= @0xE0 (CALLER)) (= (calldataload 0) "kill")) ;clean up
+									(when (&& (= @@0x10 (CALLER)) (= (calldataload 0) "kill")) ;clean up (only Doug can kill this contract)
 										(suicide (CALLER))
 									)
 
 									(when (> @@0x11 0) (stop)) ;Already been passed
 
 									[0x60] "check"
-									[0x80] (calldataload 0x20)
+									[0x80] (CALLER)
 									(call (- (GAS) 100) @0x40 0 0x60 0x40 0x0 0x20) ;Call user manager and find out if the caller has permissions (0x0)
 									
 									[0x0](MOD(DIV @0x0 2)2);Second Digit (if they are an admin = 1) ;standard admin check
