@@ -231,6 +231,20 @@
 
 		} ; end when body
 	) ;end when
+
+	(when (&& (= @0x0 "getnick") (> @0x20 0x20) ) ;Get user nick (if any)
+		{
+			(return @@ @0x20 0x20)
+
+		} ; end when body
+	) ; end when
+	
+	(when (&& (= @0x0 "getaddr") (> @0x20 0x20) ) ;Get user nick (if any)
+		{
+			(return @@ @0x20 0x20)
+
+		} ; end when body
+	) ; end when	
 	
 };end of program
 
