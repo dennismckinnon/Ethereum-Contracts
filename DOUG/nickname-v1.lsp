@@ -74,9 +74,9 @@
 	[0x0] (calldataload 0)	;This is the command
 	[0x20] (calldataload 0x20)	;This is the name
 
-	(when (&& (= @0x0 "kill") (= (CALLER) @@0x1) ) (suicide (CALLER)) ) ;Kill option
+	(when (AND (= @0x0 "kill") (= (CALLER) @@0x1) ) (suicide (CALLER)) ) ;Kill option
 	
-	(when (&& (= @0x0 "reg") (> @0x20 0x20)) ;Command "reg" and make sure it won't overwrite important data 
+	(when (AND (= @0x0 "reg") (> @0x20 0x20)) ;Command "reg" and make sure it won't overwrite important data 
 		{
 			; Don't let people register their address as their user name. That's just weird.
 			(when (= (CALLER) @0x20 ) (stop) )
@@ -122,7 +122,7 @@
 		} ;end body of when
 	); end when
 
-	(when (&& (= @0x0 "dereg") (= @0x20 0) )  ;When de-regging a users own nick (no nick param).
+	(when (AND (= @0x0 "dereg") (= @0x20 0) )  ;When de-regging a users own nick (no nick param).
 		{
 
 			(when @@(caller)
@@ -173,7 +173,7 @@
   		} ;end body of when
 	) ;end when
 
-	(when (&& (= @0x0 "dereg") (> @0x20 0x20) ) ; When de-regging by name.
+	(when (AND (= @0x0 "dereg") (> @0x20 0x20) ) ; When de-regging by name.
 		{
 			;First we make sure that the user owning the nick is not an admin,
 			;then we make sure that the deleter (caller) is an admin.
@@ -231,6 +231,20 @@
 
 		} ; end when body
 	) ;end when
+
+	(when (&& (= @0x0 "getnick") (> @0x20 0x20) ) ;Get user nick (if any)
+		{
+			(return @@ @0x20 0x20)
+
+		} ; end when body
+	) ; end when
+	
+	(when (&& (= @0x0 "getaddr") (> @0x20 0x20) ) ;Get user nick (if any)
+		{
+			(return @@ @0x20 0x20)
+
+		} ; end when body
+	) ; end when	
 	
 };end of program
 
