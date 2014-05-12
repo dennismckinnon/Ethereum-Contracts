@@ -55,6 +55,13 @@
 										(suicide (CALLER))
 									)
 
+									(when (= @0x20 "check")
+										{
+											[0x40]@@0x11
+											(return 0x40 0x20) ;return the value in storage
+										}
+									)
+
 									(when (> @@0x11 0) (stop)) ;Already been passed
 
 									[0x60] "check"
@@ -69,13 +76,6 @@
 									(when (= @0x20 "vote")
 										{
 											[[0x11]](calldataload 0x20) ;Store whatever they voted
-										}
-									)
-
-									(when (= @0x20 "check")
-										{
-											[0x40]@@0x11
-											(return 0x40 0x20) ;return the value in storage
 										}
 									)
 								}
