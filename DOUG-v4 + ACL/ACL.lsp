@@ -87,8 +87,8 @@
 	[[0x13]] 0x14	;Tail
 	[[0x14]] 0x14 	;Head
 
-	[["ACL"]]0 ;ACL permissions located at 0th roo start position 0
-	[[CALLER]]2 ;Give (CALLER) full ACL permissions to start
+	[["ACL"]]0 ;ACL permissions located at 0th root start position 0
+	[[(CALLER)]]2 ;Give (CALLER) full ACL permissions to start
 }
 {
 	;Doug Update
@@ -113,12 +113,12 @@
 			[0x20](calldataload 0x20) 		;Get Permission Name
 			[0x40](calldataload 0x40) 		;Get Target (optional)
 			(unless @0x40 [0x40](CALLER))	;If Target not sent default: CALLER
-			[0x40] @@ @0x20 				;Get the permission names bit data
-			[0x60](MOD @0x20 32) 			;Get start position
-			[0x80](DIV @0x20 32)	 		;Get Row permission located on.
+			[0x60] @@ @0x20 				;Get the permission names bit data
+			[0x80](MOD @0x60 32) 			;Get start position
+			[0xA0](DIV @0x60 32)	 		;Get Row permission located on.
 
-			[0xA0](MOD (DIV @@(+ @0x40 @0x80) (EXP 2 @0x60)) 8) 	;This is The permission value
-			(return 0xA0 0x20) ;Return requested value
+			[0xC0](MOD (DIV @@(+ @0x40 @0xA0) (EXP 2 @0x80)) 8) 	;This is The permission value
+			(return 0xC0 0x20) ;Return requested value
 		}
 	)
 
@@ -130,7 +130,7 @@
 ;This takes in a list of permission name:permission level pairs and
 ;Returns a lost of the associated poll creation contracts.
 
-	(when (= @0x0 "fetch") ;Form: "fetch" #ofperms list["Permission name":#permission]
+	(when (= @0x0 "fetch")
 		{
 			;Fetch the Poll creation contracts and return as list of contract addresses
 			[0x20](calldataload 0x20) ;Number of permissions requesting
@@ -168,12 +168,12 @@
 			
 			;Stage 1 - Create poll manager contract With ACL permissions
 
-			[0x0](+ (calldataload) 200000)
+			[0x0](+ (calldataload 0x20) 200000)
 			(unless (&& (calldataload 0x20) @@ @0x0) (STOP)) ;Don't allow empty names
 
 			(call (- (GAS) 100) @0x0 0 0 0 0x0 0x20) ;Call PCMCC for type
 
-			[[@0x0](| @@ @0x0 0x1) ;Set the permissions for ACL to be 1
+			[[@0x0]](| @@ @0x0 0x1) ;Set the permissions for ACL to be 1
 
 			;Stage 2 - Initialize the PCM
 			[0x20](calldataload (+ (* (calldataload 0x60) 0x40) 0x60)) ;Get target address
@@ -192,7 +192,7 @@
 ;Sets the target address's permission level for "permission name" to the provided
 ;value. If target not provided defaults to CALLER
 
-	(when (= @0x0 "set")		;Form: "set" "Permission Name" #permission <0xTargetAddress>
+	(when (= @0x0 "set")
 		{
 			;Permission Check - Permission needed: 1 or 2
 			[0x0]"check"
@@ -271,7 +271,7 @@
 ;Contract listed is actually a poll contract manager - creation
 ;contract. (what a mouthful!)
 
-	(when (= @0x0 "addtype") Form: "addtype" "Type Name" 0xTypeAddress
+	(when (= @0x0 "addtype")
 		{
 			;Permission Check - Permission needed: 2
 			[0x0]"check"

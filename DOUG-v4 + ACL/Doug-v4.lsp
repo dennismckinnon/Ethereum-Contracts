@@ -168,7 +168,7 @@
 			(unless (&& (> @0x20 0x20)(> @0x40 0x20)) (STOP)); Prevent out of bounds registrations
 
 			[0x60] 0 	;where permission will be stored (cleared out just to be safe)
-			(if (&& @@"ACL" @@ @0x20) If ACL is registered AND the name is taken
+			(if (&& @@"ACL" @@ @0x20) ;If ACL is registered AND the name is taken
 				{
 					;If ACL is registered -> Use it to get permissions of caller
 					[0x80]"check"
@@ -187,7 +187,7 @@
 			(if (= @@ @0x20 0) ;name does not exist yet
 				{
 					;Perform appending to list (check that there is space)
-					(unless (&& (= (- @0x20 2) 0) (= (- @0x20 1) 0) (= (+ @0x20 1) 0) (= (+ @0x20 2) 0) (= @@ @0x40 0)) (STOP)) ; Check enough space 
+					(unless (&& (= @@(- @0x20 2) 0) (= @@(- @0x20 1) 0) (= @@(+ @0x20 1) 0) (= @@(+ @0x20 2) 0) (= @@ @0x40 0)) (STOP)) ; Check enough space 
 					[[@0x20]] @0x40 ;Store target at name
 					[[(+ @0x20 1)]] @@0x16 	;Set previous to value in head
 					[[(+ @@0x16 2)]] @0x20 	;Set head's next to current name
