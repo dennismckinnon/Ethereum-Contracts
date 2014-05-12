@@ -21,12 +21,16 @@
 ;					- Form: "check" "Permission Name" <0xTargetAddress>
 ;					- Returns: Permission number requested
 ;
+;Fetch 				- Permission needed: 0
+; 					- Form: "fetch" #ofperms list["Permission name":#permission]
+; 					- Returns: list[poll creation contract addresses]
+;
 ;Request Permission - Permission needed: 0
 ;					- Form: "request" "Permission Name" #permission <0xTargetAddress>
 ;					- Returns: Nothing
 ;
 ;Request Permission - Permission needed: 0
-; (Multiple) 		- Form: "request" #ofperms list["Permission name":#permission] <0xTargetAddress>
+; (Multiple) 		- Form: "request" "type" #ofperms list["Permission name":#permission] <0xTargetAddress>
 ;					- Returns: Nothing
 ;
 ;Set Permission 	- Permission needed: 1
@@ -34,9 +38,12 @@
 ;					- Returns: 1(success), 0(failure)
 ;
 ;Add rule			- Permission needed: 2
-;(replace rule)		- Form: "add" "Permission Name" #permission 0xRuleAddress
+;(replace rule)		- Form: "addrule" "Permission Name" #permission 0xRuleAddress
 ;					- Returns: 1(success), 0(failure)
 ;
+;Add type 			- Permission needed: 2
+; (replace type)	- Form: "addtype" "Type Name" 0xTypeAddress
+; 					- Returns: 1(success), 0(failure)
 ;
 ;Permissions
 ;@Address bitstring 
@@ -76,6 +83,10 @@
 	[[0x11]] 0 				;Current allocation row
 	[[0x12]] 3 				;Current allocation start position
 
+	;Standard link list for the "type"s
+	[[0x13]] 0x14	;Tail
+	[[0x14]] 0x14 	;Head
+
 	[["ACL"]]0 ;ACL permissions located at 0th roo start position 0
 	[[CALLER]]2 ;Give (CALLER) full ACL permissions to start
 }
@@ -87,7 +98,16 @@
 	[[0x10]] @0x0
 
 	[0x0](calldataload 0)
-	(when (= @0x0 "check") 		;Form: "check" 0xTargetAddress "Permission name"
+
+
+;--------------------------------------------------------------------------------
+;Check Permission 	- Permission needed: 0
+;					- Form: "check" "Permission Name" <0xTargetAddress>
+;					- Returns: Permission number requested
+; Checks what permission level the target address has for permission given by
+;"Permission Name" if no target provided, Defaults to CALLER
+
+	(when (= @0x0 "check")
 		{
 			;Check what permission target has. If Target not provided defaults to CALLER
 			[0x20](calldataload 0x20) 		;Get Permission Name
@@ -101,6 +121,14 @@
 			(return 0xA0 0x20) ;Return requested value
 		}
 	)
+
+
+;---------------------------------------------------------------------
+;Fetch 	- Permission needed: 0
+; 		- Form: "fetch" #ofperms list["Permission name":#permission]
+; 		- Returns: list[poll creation contract addresses]
+;This takes in a list of permission name:permission level pairs and
+;Returns a lost of the associated poll creation contracts.
 
 	(when (= @0x0 "fetch") ;Form: "fetch" #ofperms list["Permission name":#permission]
 		{
@@ -126,27 +154,43 @@
 		}
 	)
 
-	(when (= @0x0 "request") 	;Form: "request" #ofperms list["Permission name":#permission] <0xTargetAddress>
+
+;-----------------------------------------------------------------------------------------------------------
+;Request Permission - Permission needed: 0
+;					- Form: "request" "type" #ofperms list["Permission name":#permission] <0xTargetAddress>
+;					- Returns: Nothing
+;Opens up a request for the permissions provided by the the list to be attributed to the target address
+;"type" provides the type of poll manager contract to use (by name). If no target address provided then
+;Defaults to CALLER.
+
+	(when (= @0x0 "request")
 		{
-			;Request the permission. If Target not provided defaults to CALLER
-
+			
 			;Stage 1 - Create poll manager contract With ACL permissions
-			[0x0](LLL
-				{
-					;Insert Poll manager code here
-				}
-				0x20
-			)
-			[0x0](CREATE 0 0x20 @0x0) ;Create the poll manager code and store address at 0x0
 
-			[[@0x0]]0x1 ;Set the permissions for ACL to be 1
+			[0x0](+ (calldataload) 200000)
+			(unless (&& (calldataload 0x20) @@ @0x0) (STOP)) ;Don't allow empty names
+
+			(call (- (GAS) 100) @0x0 0 0 0 0x0 0x20) ;Call PCMCC for type
+
+			[[@0x0](| @@ @0x0 0x1) ;Set the permissions for ACL to be 1
 
 			;Stage 2 - Initialize the PCM
-			(CALLDATACOPY 0x20 0x0 (CALLDATASIZE))
-			[0x20]"init" ;Modify command for passing data along
-			(call (- (GAS) 100) @0x0 0 0x20 (+ (CALLDATASIZE) 0x20) 0x0 0x0) ;Initialize the PCM
+			[0x20](calldataload (+ (* (calldataload 0x60) 0x40) 0x60)) ;Get target address
+			(CALLDATACOPY 0x40 0x20 (CALLDATASIZE))
+			(unless @0x20 [(+ (CALLDATASIZE) 0x20)](CALLER)) ;If target not specified default to (CALLER)
+			[0x40]"init" ;Modify command for passing data along
+			(call (- (GAS) 100) @0x0 0 0x40 (+ (CALLDATASIZE) 0x40) 0x0 0x0) ;Initialize the PCM
 		}
 	)
+
+
+;---------------------------------------------------------------------------------
+;Set Permission 	- Permission needed: 1
+;(give/change)		- Form: "set" "Permission Name" #permission <0xTargetAddress>
+;					- Returns: 1(success), 0(failure)
+;Sets the target address's permission level for "permission name" to the provided
+;value. If target not provided defaults to CALLER
 
 	(when (= @0x0 "set")		;Form: "set" "Permission Name" #permission <0xTargetAddress>
 		{
@@ -175,7 +219,15 @@
 		}
 	)
 
-	(when (= @0x0 "add") 		;Form: "add" "Permission Name" #permission 0xRuleAddress
+
+;------------------------------------------------------------------------------------------------
+;Add rule			- Permission needed: 2
+;(replace rule)		- Form: "addrule" "Permission Name" #permission 0xRuleAddress
+;					- Returns: 1(success), 0(failure)
+;This sets the poll contract which determines whether or not a given permission can be given out
+;The contract added here will create these polls and return the address of the created poll
+
+	(when (= @0x0 "addrule")
 		{
 			;Permission Check - Permission needed: 2
 			[0x0]"check"
@@ -209,25 +261,37 @@
 			(return 0x80 0x20) ;If it got here return Success
 		}
 	)
+
+
+;---------------------------------------------------------------
+;Add type 			- Permission needed: 2
+; (replace type)	- Form: "addtype" "Type Name" 0xTypeAddress
+; 					- Returns: 1(success), 0(failure)
+;Similar to Addrule. This Adds "type" of poll managers. The
+;Contract listed is actually a poll contract manager - creation
+;contract. (what a mouthful!)
+
+	(when (= @0x0 "addtype") Form: "addtype" "Type Name" 0xTypeAddress
+		{
+			;Permission Check - Permission needed: 2
+			[0x0]"check"
+			[0x20]"ACL"
+			[0x40](CALLER)
+			(call (- (GAS) 100) (ADDRESS) 0 0x0 0x60 0x60 0x20)
+
+			(unless (= @0x60 2) (STOP)) ;If you do not have the required permissions stop
+
+			(unless (calldataload 0x40) (STOP))
+			[0x20](+ (calldataload 0x20) 0x200000) ;Get Type name (offset so avoid conflicts with other names)
+
+			(when (= @@ @0x20 0)
+				{
+					[[@0x20]](calldataload 0x40) ;Copy 0xTypeAddress to type name
+					[[(+ @@0x14 1)]]@0x20 ;Link this to the list
+					[[@@0x14]]@0x20
+				}
+			)
+
+		}
+	)
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
