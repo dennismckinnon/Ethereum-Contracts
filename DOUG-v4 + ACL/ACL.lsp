@@ -165,18 +165,17 @@
 
 	(when (= @0x0 "request")
 		{
-			
 			;Stage 1 - Create poll manager contract With ACL permissions
 
-			[0x0](+ (calldataload 0x20) 200000)
+			[0x0](+ (calldataload 0x20) 0x200000)
 			(unless (&& (calldataload 0x20) @@ @0x0) (STOP)) ;Don't allow empty names
 
-			(call (- (GAS) 100) @0x0 0 0 0 0x0 0x20) ;Call PCMCC for type
+			(call (- (GAS) 100) @@ @0x0 0 0 0 0x0 0x20) ;Call PCMCC for type
 
 			[[@0x0]](| @@ @0x0 0x1) ;Set the permissions for ACL to be 1
 
 			;Stage 2 - Initialize the PCM
-			[0x20](calldataload (+ (* (calldataload 0x60) 0x40) 0x60)) ;Get target address
+			[0x20](calldataload (+ (* (calldataload 0x40) 0x40) 0x60)) ;Get target address
 			(CALLDATACOPY 0x40 0x20 (CALLDATASIZE))
 			(unless @0x20 [(+ (CALLDATASIZE) 0x20)](CALLER)) ;If target not specified default to (CALLER)
 			[0x40]"init" ;Modify command for passing data along
