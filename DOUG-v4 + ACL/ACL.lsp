@@ -177,9 +177,17 @@
 			;Stage 2 - Initialize the PCM
 			[0x20](calldataload (+ (* (calldataload 0x40) 0x40) 0x60)) ;Get target address
 			(CALLDATACOPY 0x40 0x20 (CALLDATASIZE))
-			(unless @0x20 [(+ (CALLDATASIZE) 0x20)](CALLER)) ;If target not specified default to (CALLER)
 			[0x40]"init" ;Modify command for passing data along
-			(call (- (GAS) 100) @0x0 0 0x40 (+ (CALLDATASIZE) 0x40) 0x0 0x0) ;Initialize the PCM
+			(if @0x20 ;initialize PCM
+				{
+					(call (- (GAS) 100) @0x0 0 0x40 (- (CALLDATASIZE) 0x20) 0x0 0x0)
+				}
+				{
+					[(+ (CALLDATASIZE) 0x20)](CALLER) ;If target not specified default to (CALLER)
+					(call (- (GAS) 100) @0x0 0 0x40 (CALLDATASIZE) 0x0 0x0)
+				}
+			)
+			(STOP)
 		}
 	)
 
@@ -283,14 +291,20 @@
 			(unless (calldataload 0x40) (STOP))
 			[0x20](+ (calldataload 0x20) 0x200000) ;Get Type name (offset so avoid conflicts with other names)
 
-			(when (= @@ @0x20 0)
+			(if (= @@ @0x20 0)
 				{
 					[[@0x20]](calldataload 0x40) ;Copy 0xTypeAddress to type name
-					[[(+ @@0x14 1)]]@0x20 ;Link this to the list
+					[[(+ @0x20 1)]]@@0x14 ;Backwards pointer
+					[[(+ @@0x14 2)]]@0x20 ;Link this to the list
 					[[@@0x14]]@0x20
 				}
+				{
+					[[@0x20]](calldataload 0x40) ;Copy 0xTypeAddress to type name
+					[[(+ @@(+ @0x20 1) 2)]]@0x20 ;Edit previous's forward pointer
+					(when @@(+ @0x20 2) [[(+ @@(+ @0x20 2) 1)]]@0x20)
+				}
 			)
-
+			(STOP)
 		}
 	)
 }
