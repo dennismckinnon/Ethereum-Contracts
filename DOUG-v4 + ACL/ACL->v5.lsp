@@ -1,9 +1,4 @@
-;Doug-v5
-;
-;Default Behaviour: If a name has not been registered before, Automatically accept
-
-;Usage:		
-
+;ACL
 
 ;Default behaviour: If the permission name has been registered but the rule for a specific permission level
 ;					does not yet exist. The the permission is automatically rejected.
@@ -21,30 +16,7 @@
 ;					edit permissions of contracts if you have ACL permissions and target contract permissions. 
 ;					This won't be implemented in this iteration.
 
-
-
 ;API
-;Check Name 	- Permission needed: 0
-; 				- Form: "check" "Name"
-;				- Returns: 0 (DNE), 0xContractAddress
-
-;Get DB Size 	- Permission needed: 0
-;				- Form: "dbsize"
-;				- Returns: # of entries
-
-;Data Dump 		- Permission needed: 0
-;				- Form: "dump"
-;				- Returns: list["Name":0xContractAddress]
-
-;In list? 	 	- Permission needed: 0
-; (Known names)	- Form: "known" "Name"
-;				- Returns: 1 (Is Known), 0 (Not)
-
-;Register Name 	- Permission needed: 1
-;				- Form: "register" "Name" <0xTargetAddress>
-;				- Returns: 1 (Success), 0 (Failure)
-
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ;Check Permission 	- Permission needed: 0
 ;					- Form: "check" "Permission Name" <0xTargetAddress>
 ;					- Returns: Permission number requested
@@ -72,33 +44,10 @@
 ;Add type 			- Permission needed: 2
 ; (replace type)	- Form: "addtype" "Type Name" 0xTypeAddress
 ; 					- Returns: 1(success), 0(failure)
-
-;Structure
-;=========
-
-;Names List
-;----------
-;The Names list is implemented as a linked list for future proofability
-;At some point in the future it might be desirable to be able to edit 
-;And store some data tied to a contract name. This is not currently used
-;But would be easy to add in slots "name"+i>2. This linked list is
-;Bi-Directional in order to future proof incase deletions are someday 
-;wanted.
-; 
-;@@"name" 0xContractAddress
-;+1 "previous name"
-;+2 "next name"
-
-;Name History
-;------------
-;This version of Doug will store a history of every contract which has
-;Been registered to Doug for each nameover the course of his existance.
-;It is implemented as a uni-directional linked list starting at "name"
 ;
-;@0xContractforname 0xPreviouscontractforname
-
-;+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
+;
+;DATA STRUCTURES
+;---------------
 ;Permissions for address
 ;@Address bitstring 
 ;+1
@@ -117,188 +66,51 @@
 ;@"type name" + 0x200000 0xPCMCCAddress
 
 
-;======================================================================
-;
-
 {
-	;METADATA SECTION
-	[[0x0]] 0x88554646AB						;metadata notifier
-	[[0x1]] (CALLER)							;contract creator
-	[[0x2]] "Dennis McKinnon"					;contract Author
-	[[0x3]] 0x013052014							;Date
-	[[0x4]] 0x001005000							;version XXX.XXX.XXX
-	[[0x5]] "doug" 								;Name
-	[[0x6]] "12345678901234567890123456789012"	;Brief description (not past address 0xF)
-	[[0x6]] "Doug is a Decentralized Organiza"
-	[[0x7]] "tion Upgrade Guy. His purpose is"
-	[[0x8]] "to serve a recursive register fo"
-	[[0x9]] "r contracts belonging to a DAO s"
-	[[0xA]] "other contracts can find out whi"
-	[[0xB]] "ch addresses to reference withou"
-	[[0xC]] "hardcoding. It also allows any c"
-	[[0xD]] "contract to be swapped out inclu"
-	[[0xE]] "ding DOUG himself."
+	;Metadata Section
+;	[[0x0]] 0x88554646AB						;metadata notifier
+;	[[0x1]] (CALLER)							;contract creator
+;	[[0x2]] "Dennis McKinnon"					;contract Author
+;	[[0x3]] 0x07052014							;Date
+;	[[0x4]] 0x001000000							;version XXX.XXX.XXX
+;	[[0x5]] "ACL" 								;Name
+;	[[0x6]] "12345678901234567890123456789012"	;Brief description (not past address 0xF)
+;	[[0x6]] "The Access Control List (ACL) is"
+;	[[0x7]] "a unified method by which to att"
+;	[[0x8]] "ribute permission levels to user"
+;	[[0x9]] "s and contracts and to store met"
+;	[[0xA]] "hods by which those permissions "
+;	[[0xB]] "may be allocated through the reg"
+;	[[0xC]] "istration of various contracts w"
+;	[[0xD]] "hich can be spawned to determine"
+;	[[0xE]] "whether a permission is to be al"
+;	[[0xF]] "located."	
 
-	;INITIALIZATION
-	[[0x10]] 0x11d11764cd7f6ecda172e0b72370e6ea7f75f290 ;NameReg address
-	[[0x11]] 1  			; Number of registered names
+	[[0x10]] 0xDOUGADDRESS	;Doug's Address
+	[[0x11]] 0 				;Current allocation row
+	[[0x12]] 3 				;Current allocation start position
 
-	;Name Linked list
-	[[0x15]] 0x17 ; Set tail
-	[[0x16]] "doug" ;	Set head
-
-	[[0x19]]"doug"	    	; Add doug as first in name list (for consistancy) 
-	[["doug"]](ADDRESS)		; Register doug with doug
-	[[(+ "doug" 1)]]0x17 	; Set previous to tail
-
-;	NAME REGISTRATION
-;	[0x0]"Doug - Revolution"
-;	(call (- (GAS) 100) @@0x10 0 0x0 0x11 0 0) ;Register the name DOUG
-
-	[["DOUG"]]0 ;DOUG permissions located at 0th root start position 0
-	[[(CALLER)]]1 ;Give (CALLER) full DOUG permissions to start
-
+	[["ACL"]]0 ;ACL permissions located at 0th root start position 0
+	[[(CALLER)]]2 ;Give (CALLER) full ACL permissions to start
 }
 {
+	;Doug Update
+	[0x0]"check"
+	[0x20]"doug"
+	(call (- (GAS) 100) @@0x10 0 0x0 0x40 0x0 0x20)
+	[[0x10]] @0x0
 
-;DOUG Functions
-;=================================================================================
+	[0x0](calldataload 0)
 
-;-----------------------------------------------------
-;Check Name 	- Permission needed: 0
-; 				- Form: "checkname" "Name"
-;				- Returns: 0 (DNE), 0xContractAddress
-;Get the Contract Address currently associated with "name"
-
-	[0x0](calldataload 0) ;Get command
-	(when (= @0x0 "checkname")
-		{
-			[0x20]@@(calldataload 0x20) ;Get address associated with "name"
-			(return 0x20 0x20) ; Return the Address
-		}
-	)
-
-;--------------------------------------
-;Get DB Size 	- Permission needed: 0
-;				- Form: "dbsize"
-;				- Returns: # of entries
-
-	(when (= @0x0 "dbsize")
-		{
-			[0x20]@@0x11 	;Fetch the list size from storage (slot 0x11)
-			(return 0x20 0x20) 	;Return the result
-		}
-	)
-
-;--------------------------------------------------------
-;Data Dump 		- Permission needed: 0
-;				- Form: "dump"
-;				- Returns: list["Name":0xContractAddress]
-	
-	(when (= @0x0 "dump")
-		{
-			;Start at Tail
-			[0x20] @@(+ @@0x15 2)
-			[0x40]0x100
-			(while @0x20 ;Loop until end is found
-				{
-					;
-					[@0x40]@0x20 				; @0x20 is "name"
-					[(+ @0x40 0x20)]@@ @0x20 	; @@ @0x20 is contract address
-					[0x20]@@(+ @0x20 2)			; "name"+2 is pointer to next name in list (0 if at end)
-					[0x40](+ @0x40 0x40)		; Increment memory pointer
-				}
-			)
-			;All Stored in memory now return it
-			(return 0x100 (- @0x40 0x100))
-		}
-	)
-
-;-----------------------------------------------
-;In list? 	 	- Permission needed: 0
-; (Known names)	- Form: "known" "Name"
-;				- Returns: 1 (Is Known), 0 (Not)
-;This is a largely unecessary function which
-;returns 1 id a name is in the registered list
-;and 0 otherwise
-
-	(when (= @0x0 "known")
-		{
-			[0x20](calldataload 0x20) ;Get "name"
-			[0x40]0
-			(when @@ @0x20 [0x40]1) ;When there is a Contract listed at Name
-			(return 0x40 0x20)	;Return result
-		}
-	)
-
-	(unless (= @@"doug" (ADDRESS)) (STOP)) ;If no longer "doug" do not allow any of the further functions
-
-;-----------------------------------------------------------
-;Register Name 	- Permission needed: 1
-;				- Form: "register" "Name" <0xTargetAddress>
-;				- Returns: 1 (Success), 0 (Failure)
-
-	(when (= @0x0 "register")
-		{
-			[0x20] (calldataload 0x20) 		; Get "name"
-			[0x40] (calldataload 0x40)		; Get Target address
-			(unless @0x40 [0x40](CALLER))	; If Target address not provided Default: (CALLER)
-
-			(unless (&& (> @0x20 0x20)(> @0x40 0x20) (= (MOD @0x40 0x1000000) 0)) (STOP)); Prevent out of bounds registrations
-
-			[0x60] 0 	;where permission will be stored (cleared out just to be safe)
-			(if @@ @0x20 ;If the name is taken
-				{
-					[0x80]"checkperm"
-					[0xA0](CALLER) 
-					(call (- (GAS) 100) (ADDRESS) 0 0x80 0x40 0x60 0x20)
-				}
-				{
-					[0x60]1
-				}
-			)
-
-			(unless @0x60 (STOP)) ;If permissions are not 1 then stop
-
-			
-			(if (= @@ @0x20 0) ;name does not exist yet
-				{
-					;Perform appending to list (check that there is space)
-					[[@0x20]] @0x40 ;Store target at name
-					[[(+ @0x20 1)]] @@0x16 	;Set previous to value in head
-					[[(+ @@0x16 2)]] @0x20 	;Set head's next to current name
-					[[0x16]]@0x20 			;Set Head to current name
-				}
-				{
-					;Don't append but push name history down
-					(unless (= @@ @0x40 0) (STOP)) ;Ensure writing to target won't overwrite anything
-					[[@0x40]] @@ @0x20 	;Copy previous contract to pointer of new contract
-					[[@0x20]] @0x40 	;Register target to name
-					(when (= @0x20 "doug")
-						{
-							;Deregister from Namereg
-							(call (- (GAS) 100) @@0x1 0 0 0 0 0)
-						}
-					)
-				}
-			)
-			[0xC0]1
-			(return 0xC0 0x20)
-		}
-	)
-
-
-;Permissions Functions
-;==================================================================================================
 
 ;--------------------------------------------------------------------------------
 ;Check Permission 	- Permission needed: 0
-;					- Form: "checkperm" "Permission Name" <0xTargetAddress>
+;					- Form: "check" "Permission Name" <0xTargetAddress>
 ;					- Returns: Permission number requested
 ; Checks what permission level the target address has for permission given by
 ;"Permission Name" if no target provided, Defaults to CALLER
 
-	(when (= @0x0 "checkperm")
+	(when (= @0x0 "check")
 		{
 			;Check what permission target has. If Target not provided defaults to CALLER
 			[0x20](+ (calldataload 0x20) 0x10000) 	;Get Permission Name
@@ -392,13 +204,13 @@
 
 	(when (= @0x0 "set")
 		{
-			;Permission Check - Permission needed: 1
-			[0x0]"checkperm"
-			[0x20]"doug"
+			;Permission Check - Permission needed: 1 or 2
+			[0x0]"check"
+			[0x20]"ACL"
 			[0x40](CALLER)
 			(call (- (GAS) 100) (ADDRESS) 0 0x0 0x60 0x40 0x20)
 
-			(unless (= @0x40 1) (STOP)) ;If you do not have the required permissions stop
+			(unless (OR (= @0x40 1) (= @0x40 2)) (STOP)) ;If you do not have the required permissions stop
 
 			;Set Permission. If Target not provided defaults to CALLER
 			[0x20](+ (calldataload 0x20) 0x100000) 		;Get Permission Name (offset)
@@ -420,7 +232,7 @@
 
 
 ;------------------------------------------------------------------------------------------------
-;Add rule			- Permission needed: 1
+;Add rule			- Permission needed: 2
 ;(replace rule)		- Form: "addrule" "Permission Name" #permission 0xRuleAddress
 ;					- Returns: 1(success), 0(failure)
 ;This sets the poll contract which determines whether or not a given permission can be given out
@@ -428,17 +240,17 @@
 
 	(when (= @0x0 "addrule")
 		{
-			;Permission Check - Permission needed: 1
-			[0x0]"checkperm"
-			[0x20]"doug"
+			;Permission Check - Permission needed: 2
+			[0x0]"check"
+			[0x20]"ACL"
 			[0x40](CALLER)
 			(call (- (GAS) 100) (ADDRESS) 0 0x0 0x60 0x60 0x20)
 
 			;Security Checks
-			(unless (= @0x60 1) (STOP)) ;If you do not have the required permissions stop
+			(unless (= @0x60 2) (STOP)) ;If you do not have the required permissions stop
 			(unless (calldataload 0x40) (STOP)) ;Type address provided
 			(unless (AND (> (calldataload 0x20) 0x20) (= (MOD (calldataload 0x20) 0x1000000)) 0) (STOP)) ;name in range and name of "good form"
-
+			
 			;Add a permission rule contract.
 			[0x20](+ (calldataload 0x20) 0x100000) 	;Get Permission name this rule belongs to (offset)
 			[0x40](calldataload 0x40) 	;Get Permission number this rule applies to
@@ -466,7 +278,7 @@
 
 
 ;---------------------------------------------------------------
-;Add type 			- Permission needed: 1
+;Add type 			- Permission needed: 2
 ; (replace type)	- Form: "addtype" "Type Name" 0xTypeAddress
 ; 					- Returns: 1(success), 0(failure)
 ;Similar to Addrule. This Adds "type" of poll managers. The
@@ -475,14 +287,14 @@
 
 	(when (= @0x0 "addtype")
 		{
-			;Permission Check - Permission needed: 1
-			[0x0]"checkperm"
-			[0x20]"doug"
+			;Permission Check - Permission needed: 2
+			[0x0]"check"
+			[0x20]"ACL"
 			[0x40](CALLER)
 			(call (- (GAS) 100) (ADDRESS) 0 0x0 0x60 0x60 0x20)
 
 			;Security Checks
-			(unless (= @0x60 1) (STOP)) ;If you do not have the required permissions stop
+			(unless (= @0x60 2) (STOP)) ;If you do not have the required permissions stop
 			(unless (calldataload 0x40) (STOP)) ;Type address provided
 			(unless (AND (> (calldataload 0x20) 0x20) (= (MOD (calldataload 0x20) 0x1000000)) 0) (STOP)) ;name in range and name of "good form"
 
@@ -493,4 +305,3 @@
 		}
 	)
 }
-
