@@ -59,6 +59,7 @@
 ;position number between 1-32 (5 bits)
 ;
 
+
 {
 	;Metadata Section
 ;	[[0x0]] 0x88554646AB						;metadata notifier
@@ -204,7 +205,8 @@
 			;Permission Check - Permission needed: 1 or 2
 			[0x0]"check"
 			[0x20]"ACL"
-			(call (- (GAS) 100) (ADDRESS) 0 0x0 0x40 0x40 0x20)
+			[0x40](CALLER)
+			(call (- (GAS) 100) (ADDRESS) 0 0x0 0x60 0x40 0x20)
 
 			(unless (OR (= @0x40 1) (= @0x40 2)) (STOP)) ;If you do not have the required permissions stop
 
@@ -213,14 +215,14 @@
 			[0xA0](calldataload 0x40)		;Get The permission number to set
 			[0x40](calldataload 0x60) 		;Get Target (optional)
 			(unless @0x40 [0x40](CALLER))	;If Target not sent default: CALLER
-			[0x40] @@ @0x20 				;Get the permission names bit data
+			[0x20] @@ @0x20 				;Get the permission names bit data
 			[0x60](MOD @0x20 32) 			;Get start position
 			[0x80](DIV @0x20 32)	 		;Get Row permission located on.
 
 			[0xC0](MOD (DIV @@(+ @0x40 @0x80) (EXP 2 @0x60)) 8) 	;This is The current permission value
 			[0xE0](- @@(+ @0x40 @0x80) (* (EXP 2 @0x60) @0xC0))		;Subtract out all permissions at this slot
 			[0xE0](+ @0xE0 (* (EXP 2 @0x60) @0xA0))					;Add in the new permissions at this slot
-			[[(+ @0x20 @0x80)]]@0xE0								;Set
+			[[(+ @0x40 @0x80)]]@0xE0								;Set
 			[0x80]1
 			(return 0x80 0x20)
 		}
