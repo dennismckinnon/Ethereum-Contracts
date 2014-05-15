@@ -8,6 +8,15 @@
 ; 				- Form: "newp" 0xThreadIdentifier | Other data
 ;				- Returns: 0/1 (fail/succeed)
 ;
+
+;Having second thoughts about these ones. Maybe we want to implement something more
+;interesting. After all just because you delink the entry from the list doesn't mean
+;people HAVE to delete the file. Infact the conversation can continue anyways.
+;you could delete the header which would make it impossible for the thread to continue
+;We can discuss this in more detail. Maybe Admins simply function to clean out spam
+;In which case we could implement an admin's ignore list. Not mandatory to ignore
+;but you won't download them automatically unless you really want to.
+;################################################################################
 ; Delete Thread - Permission Required: 2 or original Creator
 ; 				- Form: "delt" 0xThreadIdentifier
 ; 				- Returns: 0/1 (fail/succeed)
@@ -15,6 +24,7 @@
 ; Delete Post 	- Permission Required: 2 or original creator
 ; 				- Form: "delp" 0xPostIdentifier
 ; 				- Returns: 0/1 (fail/succeed)
+;################################################################################
 
 ;0xThreadIdentifier = Sha3(CALLER:NUMBER:TITLE) (Should this value be invalid)
 ;0xPostIdentifier = Sha3(CALLER:NUMBER:CALLDATA)
@@ -130,10 +140,5 @@
 			(return 0x0 0x20)
 		}
 	)
-
-;------------------------------------------------------------
-; Delete Thread - Permission Required: 2 or original Creator
-; 				- Form: "delt" 0xThreadIdentifier
-; 				- Returns: 0/1 (fail/succeed)
 
 }
