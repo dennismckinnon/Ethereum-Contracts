@@ -18,12 +18,20 @@
 ;
 ;Threads Linked list
 ;
+;The Threads linked list starts @@0x11 an pushes downward. So the newest thread will always
+;be at the start of the list.
+;
+;Posts linked list
+;The Posts linked list is attached to a Thread header which points to the newest post in the
+;Thread. Similar to the threads linked list, further down the list = older posts.
+;
 ;@@0xThreadIdentifier : 0xCreatorAddress
 ;+1 : 0xPreviousThread
 ;+2 : Title[0,1F]
 ;+3 : Title[20,3F] (Title can be a max of 64 Bytes)
 ;+4 : number of posts
 ;+5 : Pointer to newest post
+;+6 : Latest edit block number
 ; More info can be added here If we need it
 
 ;@@0xPostIdentifier : 0xOlderPost
@@ -31,6 +39,8 @@
 ;+2 : Sha1 value for torrent
 ;+3 : cont.
 
+;TODO:
+;Reorder threads list to have the latest modified thread on top?
 
 {
 	[[0x11]] 0x16 ;Threads list start
@@ -96,7 +106,7 @@
 			;Link post
 			[[(+ (calldataload 0x20) 5)]]@0x0 ;set this as newest
 			[[(+ (calldataload 0x60) 4)]](+ @@(+ (calldataload 0x20) 4) 1) ;Increment number of posts in thread
-
+			[[(+ (calldataload 0x60) 6)]](NUMBER) ;Indicate when this thread was last edited.
 			[0x0]1
 			(return 0x0 0x20)
 		}
