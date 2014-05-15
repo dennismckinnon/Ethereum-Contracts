@@ -36,8 +36,11 @@
 
 ;@@0xPostIdentifier : 0xOlderPost
 ;+1 : 0xCreatorAddress
-;+2 : Sha1 value for torrent
+;+2 : btih
 ;+3 : cont.
+;+4 : dn
+;+5 : cont.
+
 
 ;TODO:
 ;Reorder threads list to have the latest modified thread on top?
@@ -102,8 +105,10 @@
 			;Fill in Post entry
 			[[@0x0]]@@(+ (calldataload 0x20) 6) ;Point to previous newest
 			[[(+ @0x0 1)]](CALLER)
-			[[(+ @0x0 2)]](calldataload 0x40) ;Store the torrent data
+			[[(+ @0x0 2)]](calldataload 0x40) ;btih
 			[[(+ @0x0 3)]](calldataload 0x60)
+			[[(+ @0x0 4)]](calldataload 0x80) ;dn
+			[[(+ @0x0 5)]](calldataload 0xA0)
 
 			;Link post
 			[[(+ (calldataload 0x20) 5)]]@0x0 ;set this as newest
