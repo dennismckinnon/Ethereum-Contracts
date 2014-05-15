@@ -46,7 +46,7 @@
 ;Reorder threads list to have the latest modified thread on top?
 
 {
-	[[0x11]] 0x16 ;Threads list start
+	[[0x11]] 0x16 ;This is an empty thread just to start the list. You can't post to it because its not good form
 	[[0x12]] 0    ;Number of threads
 
 	[[0x13]] 0x100000
@@ -73,14 +73,14 @@
 
 			;Create thread entry
 			[[@0x0]](CALLER)
-			[[(+ @0x0 1)]]@@0x12 ;Pointer to next newest thread
+			[[(+ @0x0 1)]]@@0x11 ;Pointer to next newest thread
 			[[(+ @0x0 3)]](calldataload 0x20)
 			[[(+ @0x0 4)]](calldataload 0x40) ;Title
 
 			;Link to list
 			[[(+ @@0x11 2)]]@0x0 ;set old's newer
 			[[0x11]]@0x0 ;Set newest pointer to this entry 
-			[[0x12]](+ @0x12 1) ;Increment number of threads counting
+			[[0x12]](+ @@0x12 1) ;Increment number of threads counting
 
 			[0x20]1
 			(return 0x20 0x20) ;Return that it succeeded
@@ -89,7 +89,7 @@
 
 ;---------------------------------------------------------------------------------------
 ; New Post 		- Permission Required: 0 (Can set to 1 if we want to restrict posting)
-; 				- Form: "newp" 0xThreadIdentifier TorrentSha1
+; 				- Form: "newp" 0xThreadIdentifier 0x(64 Bytes of storage for btih and dn)
 ;				- Returns: 0/1 (fail/succeed)
 	(when (= (calldataload 0) "newp")
 		{
@@ -105,14 +105,12 @@
 			;Fill in Post entry
 			[[@0x0]]@@(+ (calldataload 0x20) 6) ;Point to previous newest
 			[[(+ @0x0 1)]](CALLER)
-			[[(+ @0x0 2)]](calldataload 0x40) ;btih
+			[[(+ @0x0 2)]](calldataload 0x40) ;64 bytes of storage for btih and dn
 			[[(+ @0x0 3)]](calldataload 0x60)
-			[[(+ @0x0 4)]](calldataload 0x80) ;dn
-			[[(+ @0x0 5)]](calldataload 0xA0)
 
 			;Link post
-			[[(+ (calldataload 0x20) 5)]]@0x0 ;set this as newest
-			[[(+ (calldataload 0x60) 4)]](+ @@(+ (calldataload 0x20) 4) 1) ;Increment number of posts in thread
+			[[(+ (calldataload 0x20) 6)]]@0x0 ;set this as newest
+			[[(+ (calldataload 0x20) 5)]](+ @@(+ (calldataload 0x20) 5) 1) ;Increment number of posts in thread
 			
 			(unless (= @@0x11 (calldataload 0x20)) ;When this thread is not alread at the top of the list, move it there 
 				{
